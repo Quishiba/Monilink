@@ -1,4 +1,4 @@
-export type Language = 'fr' | 'en';
+export type Language = 'fr' | 'en' | 'de';
 
 export interface Translations {
   home: {
@@ -107,6 +107,28 @@ export interface Translations {
     login: string;
     signup: string;
     guest: string;
+    loginTitle: string;
+    loginSubtitle: string;
+    emailOrPhone: string;
+    password: string;
+    forgotPassword: string;
+    noAccount: string;
+    registerTitle: string;
+    registerSubtitle: string;
+    confirmPassword: string;
+    agreeToTerms: string;
+    createAccount: string;
+    haveAccount: string;
+    resetPasswordTitle: string;
+    resetPasswordSubtitle: string;
+    sendResetCode: string;
+    resetCodeSent: string;
+    resetCodeSentMessage: string;
+    backToLogin: string;
+    verificationRequired: string;
+    verificationRequiredMsg: string;
+    verifyAccount: string;
+    later: string;
   };
   common: {
     save: string;
@@ -232,6 +254,28 @@ export const translations: Record<Language, Translations> = {
       login: 'Se connecter',
       signup: 'S\'inscrire',
       guest: 'Invité',
+      loginTitle: 'Bienvenue',
+      loginSubtitle: 'Connectez-vous pour accéder à toutes les fonctionnalités',
+      emailOrPhone: 'Email ou Téléphone',
+      password: 'Mot de passe',
+      forgotPassword: 'Mot de passe oublié?',
+      noAccount: 'Pas de compte?',
+      registerTitle: 'Créer un compte',
+      registerSubtitle: 'Rejoignez Monilink et commencez à échanger',
+      confirmPassword: 'Confirmer le mot de passe',
+      agreeToTerms: 'J\'accepte les Conditions d\'utilisation',
+      createAccount: 'Créer un compte',
+      haveAccount: 'Vous avez déjà un compte?',
+      resetPasswordTitle: 'Réinitialiser le mot de passe',
+      resetPasswordSubtitle: 'Entrez votre email ou téléphone pour recevoir un code',
+      sendResetCode: 'Envoyer le code',
+      resetCodeSent: 'Code envoyé',
+      resetCodeSentMessage: 'Nous avons envoyé un code de réinitialisation à votre email/téléphone',
+      backToLogin: 'Retour à la connexion',
+      verificationRequired: 'Vérification requise',
+      verificationRequiredMsg: 'Veuillez vérifier votre compte pour continuer',
+      verifyAccount: 'Vérifier le compte',
+      later: 'Plus tard',
     },
     common: {
       save: 'Enregistrer',
@@ -355,6 +399,28 @@ export const translations: Record<Language, Translations> = {
       login: 'Log In',
       signup: 'Sign Up',
       guest: 'Guest',
+      loginTitle: 'Welcome Back',
+      loginSubtitle: 'Log in to access all features',
+      emailOrPhone: 'Email or Phone',
+      password: 'Password',
+      forgotPassword: 'Forgot Password?',
+      noAccount: 'Don\'t have an account?',
+      registerTitle: 'Create Account',
+      registerSubtitle: 'Join Monilink and start exchanging',
+      confirmPassword: 'Confirm Password',
+      agreeToTerms: 'I agree to the Terms of Service',
+      createAccount: 'Create Account',
+      haveAccount: 'Already have an account?',
+      resetPasswordTitle: 'Reset Password',
+      resetPasswordSubtitle: 'Enter your email or phone to receive a reset code',
+      sendResetCode: 'Send Reset Code',
+      resetCodeSent: 'Code Sent',
+      resetCodeSentMessage: 'We\'ve sent a reset code to your email/phone',
+      backToLogin: 'Back to Login',
+      verificationRequired: 'Verification Required',
+      verificationRequiredMsg: 'Please verify your account to continue',
+      verifyAccount: 'Verify Account',
+      later: 'Later',
     },
     common: {
       save: 'Save',
@@ -369,6 +435,151 @@ export const translations: Record<Language, Translations> = {
       error: 'Error',
       success: 'Success',
       security: 'Security',
+    },
+  },
+  de: {
+    home: {
+      title: 'Monilink',
+      subtitle: 'Finden Sie die besten Wechselkurse',
+      searchPlaceholder: 'Währungspaare suchen...',
+      activeOffers: 'Aktive Angebote',
+      available: 'verfügbar',
+      avgExchangeRate: 'Durchschn. Wechselkurs',
+      successRate: 'Erfolgsquote',
+      avgTime: 'Durchschn. Zeit',
+    },
+    kyc: {
+      verificationRequired: 'Verifizierung erforderlich',
+      verificationRequiredMessage: 'Bitte verifizieren Sie Ihre Identität, um diesen Austausch fortzusetzen.',
+      cancel: 'Abbrechen',
+      verifyNow: 'Jetzt verifizieren',
+    },
+    profile: {
+      title: 'Profil',
+      verifiedAccount: 'Verifiziertes Konto',
+      rating: 'Bewertung',
+      swaps: 'Austausche',
+      success: 'Erfolg',
+      paymentMethods: 'Zahlungsmethoden',
+      preferredCurrencies: 'Bevorzugte Währungen',
+      menu: 'Menü',
+      settings: 'Einstellungen',
+      notifications: 'Benachrichtigungen',
+      help: 'Hilfe & Support',
+      logout: 'Abmelden',
+      language: 'Sprache',
+      kycStatus: 'KYC-Status',
+      notVerified: 'Nicht verifiziert',
+      pending: 'Wird überprüft',
+      verified: 'Verifiziert',
+      rejected: 'Abgelehnt',
+      information: 'Informationen',
+      personalInfo: 'Persönliche Informationen',
+      edit: 'Bearbeiten',
+      verifyIdentity: 'Identität verifizieren',
+      privacySecurity: 'Datenschutz & Sicherheit',
+      changePassword: 'Passwort ändern',
+      biometricAuth: 'Biometrische Authentifizierung',
+      connectedDevices: 'Verbundene Geräte',
+      deleteAccount: 'Konto löschen',
+      support: 'Support',
+      faq: 'FAQ',
+      contactSupport: 'Support kontaktieren',
+      evaluation: 'Bewertung',
+      averageRating: 'Durchschnittliche Bewertung',
+      totalExchanges: 'Gesamtzahl der Austausche',
+      receivedReviews: 'Erhaltene Bewertungen',
+      termsOfService: 'Nutzungsbedingungen',
+      privacyPolicy: 'Datenschutzrichtlinie',
+      email: 'E-Mail',
+      phone: 'Telefon',
+      address: 'Adresse',
+      name: 'Name',
+      firstName: 'Vorname',
+      lastName: 'Nachname',
+    },
+    transaction: {
+      title: 'Transaktion',
+      proposed: 'Vorgeschlagen',
+      accepted: 'Akzeptiert',
+      inProgress: 'In Bearbeitung',
+      proofSubmitted: 'Nachweis eingereicht',
+      validated: 'Validiert',
+      completed: 'Abgeschlossen',
+      cancelled: 'Storniert',
+      disputed: 'Streitig',
+      exchangeDetails: 'Austauschdetails',
+      sending: 'Senden',
+      receiving: 'Empfangen',
+      rate: 'Kurs',
+      paymentMethod: 'Zahlungsmethode',
+      participants: 'Teilnehmer',
+      timeline: 'Transaktionsverlauf',
+      acceptExchange: 'Austausch akzeptieren',
+      startPayment: 'Zahlung starten',
+      submitProof: 'Nachweis einreichen',
+      confirmReceipt: 'Empfang bestätigen',
+      openChat: 'Chat öffnen',
+    },
+    createOffer: {
+      title: 'Angebot erstellen',
+      offering: 'Ich biete an',
+      wantToReceive: 'Ich möchte erhalten',
+      amount: 'Betrag',
+      exchangeRate: 'Wechselkurs',
+      paymentMethods: 'Zahlungsmethoden',
+      comment: 'Kommentar (Optional)',
+      commentPlaceholder: 'Fügen Sie Details zu Ihrem Angebot hinzu...',
+      createOffer: 'Angebot erstellen',
+    },
+    tabs: {
+      home: 'Startseite',
+      transactions: 'Transaktionen',
+      messages: 'Nachrichten',
+      profile: 'Profil',
+    },
+    auth: {
+      loginRequired: 'Anmeldung erforderlich',
+      loginRequiredMessage: 'Bitte zuerst einloggen, um fortzufahren.',
+      login: 'Einloggen',
+      signup: 'Registrieren',
+      guest: 'Gast',
+      loginTitle: 'Willkommen zurück',
+      loginSubtitle: 'Melden Sie sich an, um auf alle Funktionen zuzugreifen',
+      emailOrPhone: 'E-Mail oder Telefon',
+      password: 'Passwort',
+      forgotPassword: 'Passwort vergessen?',
+      noAccount: 'Noch kein Konto?',
+      registerTitle: 'Konto erstellen',
+      registerSubtitle: 'Treten Sie Monilink bei und beginnen Sie zu tauschen',
+      confirmPassword: 'Passwort bestätigen',
+      agreeToTerms: 'Ich akzeptiere die Nutzungsbedingungen',
+      createAccount: 'Konto erstellen',
+      haveAccount: 'Bereits ein Konto?',
+      resetPasswordTitle: 'Passwort zurücksetzen',
+      resetPasswordSubtitle: 'Geben Sie Ihre E-Mail oder Telefon ein, um einen Code zu erhalten',
+      sendResetCode: 'Code senden',
+      resetCodeSent: 'Code gesendet',
+      resetCodeSentMessage: 'Wir haben einen Zurücksetzungscode an Ihre E-Mail/Telefon gesendet',
+      backToLogin: 'Zurück zur Anmeldung',
+      verificationRequired: 'Verifizierung erforderlich',
+      verificationRequiredMsg: 'Bitte Konto verifizieren, um einen Exchange zu starten',
+      verifyAccount: 'Jetzt verifizieren',
+      later: 'Später',
+    },
+    common: {
+      save: 'Speichern',
+      cancel: 'Abbrechen',
+      delete: 'Löschen',
+      confirm: 'Bestätigen',
+      close: 'Schließen',
+      back: 'Zurück',
+      next: 'Weiter',
+      submit: 'Einreichen',
+      loading: 'Lädt...',
+      error: 'Fehler',
+      success: 'Erfolg',
+      security: 'Sicherheit',
     },
   },
 };

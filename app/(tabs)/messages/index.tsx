@@ -3,10 +3,44 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
+import { useEffect } from 'react';
 
 export default function MessagesScreen() {
   const router = useRouter();
-  const { offers } = useApp();
+  const { offers, isAuthenticated, t } = useApp();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, router]);
+
+  if (!isAuthenticated) {
+    return (
+      <View style={styles.container}>
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
+          <View style={styles.authGuardContainer}>
+            <Text style={styles.authGuardTitle}>{t.auth.loginRequired}</Text>
+            <Text style={styles.authGuardMessage}>{t.auth.loginRequiredMessage}</Text>
+            <TouchableOpacity
+              style={styles.loginButton}
+              onPress={() => router.push('/login')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.loginButtonText}>{t.auth.login}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.signupButton}
+              onPress={() => router.push('/register')}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.signupButtonText}>{t.auth.signup}</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
 
   const conversations = offers.slice(0, 6).map((offer, index) => ({
     id: offer.id,
@@ -161,5 +195,53 @@ const styles = StyleSheet.create({
   unreadMessage: {
     color: colors.dark.text,
     fontWeight: '500' as const,
+  },
+  authGuardContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  authGuardTitle: {
+    fontSize: 24,
+    fontWeight: '700' as const,
+    color: colors.dark.text,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  authGuardMessage: {
+    fontSize: 16,
+    color: colors.dark.textSecondary,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
+  loginButton: {
+    backgroundColor: colors.dark.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 12,
+  },
+  loginButtonText: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: colors.dark.text,
+  },
+  signupButton: {
+    backgroundColor: colors.dark.surface,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    width: '100%',
+    borderWidth: 1,
+    borderColor: colors.dark.border,
+  },
+  signupButtonText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: colors.dark.text,
   },
 });

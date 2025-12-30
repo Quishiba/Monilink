@@ -1,15 +1,57 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, Plus, TrendingUp, Shield, Clock } from 'lucide-react-native';
+import { Search, Plus, TrendingUp, Shield, Clock, X } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { getCurrencyInfo } from '@/constants/currencies';
-import { Offer } from '@/types';
+import { Offer, Currency } from '@/types';
+import { useState, useMemo } from 'react';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { offers, t } = useApp();
+  const { offers, t, isAuthenticated, kycData } = useApp();
+  const [showRatesModal, setShowRatesModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showKycModal, setShowKycModal] = useState(false);
+
+  const averageRates = useMemo(() => {
+    const rateMap = new Map<string, { total: number; count: number }>();
+    
+    offers.forEach(offer => {
+      const pair = `${offer.giveCurrency}-${offer.getCurrency}`;
+      const existing = rateMap.get(pair) || { total: 0, count: 0 };
+      rateMap.set(pair, {
+        total: existing.total + offer.rate,
+        count: existing.count + 1,
+      });
+    });
+
+    const rates: { pair: string; rate: number; from: Currency; to: Currency }[] = [];
+    rateMap.forEach((value, pair) => {
+      const [from, to] = pair.split('-') as [Currency, Currency];
+      rates.push({
+        pair,
+        rate: value.total / value.count,
+        from,
+        to,
+      });
+    });
+
+    return rates;
+  }, [offers]);
+
+  const mainRate = averageRates.find(r => r.from === 'EUR' && r.to === 'XAF') || averageRates[0];
+
+  const handleCreateOffer = () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+    } else if (kycData.status !== 'verified') {
+      setShowKycModal(true);
+    } else {
+      router.push('/create-offer');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -21,7 +63,7 @@ export default function HomeScreen() {
           </View>
           <TouchableOpacity
             style={styles.createButton}
-            onPress={() => router.push('/create-offer')}
+            onPress={handleCreateOffer}
           >
             <Plus size={24} color={colors.dark.text} />
           </TouchableOpacity>
@@ -41,12 +83,26 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.contentContainer}
         >
+          {mainRate && (
+            <TouchableOpacity
+              style={styles.rateCard}
+              onPress={() => setShowRatesModal(true)}
+              activeOpacity={0.7}
+            >
+              <View style={styles.rateHeader}>
+                <Text style={styles.rateLabel}>{t.home.avgExchangeRate}</Text>
+                <TrendingUp size={16} color={colors.dark.secondary} />
+              </View>
+              <Text style={styles.rateValue}>
+                1 : {mainRate.rate.toFixed(0)}
+              </Text>
+              <Text style={styles.rateSubtext}>
+                1 {mainRate.from} = {mainRate.rate.toFixed(0)} {mainRate.to}
+              </Text>
+            </TouchableOpacity>
+          )}
+
           <View style={styles.statsContainer}>
-            <View style={styles.statCard}>
-              <TrendingUp size={20} color={colors.dark.secondary} />
-              <Text style={styles.statValue}>4.8%</Text>
-              <Text style={styles.statLabel}>{t.home.avgExchangeRate}</Text>
-            </View>
             <View style={styles.statCard}>
               <Shield size={20} color={colors.dark.secondary} />
               <Text style={styles.statValue}>99.2%</Text>
@@ -69,6 +125,106 @@ export default function HomeScreen() {
           ))}
         </ScrollView>
       </SafeAreaView>
+
+      <Modal
+        visible={showRatesModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowRatesModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{t.home.avgExchangeRate}</Text>
+              <TouchableOpacity onPress={() => setShowRatesModal(false)}>
+                <X size={24} color={colors.dark.text} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.ratesList}>
+              {averageRates.map((rate, index) => {
+                const fromInfo = getCurrencyInfo(rate.from);
+                const toInfo = getCurrencyInfo(rate.to);
+                return (
+                  <View key={index} style={styles.rateItem}>
+                    <View style={styles.rateItemCurrencies}>
+                      <Text style={styles.rateItemFlag}>{fromInfo.flag}</Text>
+                      <Text style={styles.rateItemText}>
+                        1 {rate.from} = {rate.rate.toFixed(2)} {rate.to}
+                      </Text>
+                      <Text style={styles.rateItemFlag}>{toInfo.flag}</Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showAuthModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowAuthModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.authModalContent}>
+            <Text style={styles.authModalTitle}>{t.auth.loginRequired}</Text>
+            <Text style={styles.authModalMessage}>{t.auth.loginRequiredMessage}</Text>
+            <TouchableOpacity
+              style={styles.authModalButton}
+              onPress={() => {
+                setShowAuthModal(false);
+                router.push('/login');
+              }}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.authModalButtonText}>{t.auth.login}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.authModalButtonSecondary}
+              onPress={() => {
+                setShowAuthModal(false);
+                router.push('/register');
+              }}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.authModalButtonSecondaryText}>{t.auth.signup}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showKycModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowKycModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.authModalContent}>
+            <Text style={styles.authModalTitle}>{t.auth.verificationRequired}</Text>
+            <Text style={styles.authModalMessage}>{t.auth.verificationRequiredMsg}</Text>
+            <TouchableOpacity
+              style={styles.authModalButton}
+              onPress={() => {
+                setShowKycModal(false);
+                router.push('/kyc-verification');
+              }}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.authModalButtonText}>{t.auth.verifyAccount}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.authModalButtonSecondary}
+              onPress={() => setShowKycModal(false)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.authModalButtonSecondaryText}>{t.auth.later}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -399,5 +555,130 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.dark.textSecondary,
     fontStyle: 'italic' as const,
+  },
+  rateCard: {
+    backgroundColor: colors.dark.surface,
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.dark.border,
+  },
+  rateHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  rateLabel: {
+    fontSize: 14,
+    color: colors.dark.textSecondary,
+    fontWeight: '600' as const,
+  },
+  rateValue: {
+    fontSize: 36,
+    fontWeight: '700' as const,
+    color: colors.dark.text,
+    marginBottom: 4,
+  },
+  rateSubtext: {
+    fontSize: 14,
+    color: colors.dark.textSecondary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: colors.dark.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 20,
+    paddingBottom: 40,
+    maxHeight: '70%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+    color: colors.dark.text,
+  },
+  ratesList: {
+    paddingHorizontal: 20,
+  },
+  rateItem: {
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.dark.border,
+  },
+  rateItemCurrencies: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  rateItemFlag: {
+    fontSize: 24,
+  },
+  rateItemText: {
+    flex: 1,
+    fontSize: 16,
+    color: colors.dark.text,
+    fontWeight: '600' as const,
+  },
+  authModalContent: {
+    backgroundColor: colors.dark.surface,
+    marginHorizontal: 20,
+    borderRadius: 24,
+    padding: 24,
+    alignSelf: 'center',
+    width: '90%',
+    maxWidth: 400,
+    marginTop: 'auto',
+    marginBottom: 'auto',
+  },
+  authModalTitle: {
+    fontSize: 24,
+    fontWeight: '700' as const,
+    color: colors.dark.text,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  authModalMessage: {
+    fontSize: 16,
+    color: colors.dark.textSecondary,
+    marginBottom: 24,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  authModalButton: {
+    backgroundColor: colors.dark.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  authModalButtonText: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: colors.dark.text,
+  },
+  authModalButtonSecondary: {
+    backgroundColor: colors.dark.surfaceLight,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  authModalButtonSecondaryText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: colors.dark.text,
   },
 });

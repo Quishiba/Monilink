@@ -14,8 +14,8 @@ export default function TabsLayout() {
           backgroundColor: colors.dark.surface,
           borderTopColor: colors.dark.border,
           borderTopWidth: 1,
-          height: 62,
-          paddingBottom: 6,
+          height: 54,
+          paddingBottom: 4,
           paddingTop: 4,
         },
         tabBarActiveTintColor: colors.dark.primary,
@@ -31,28 +31,28 @@ export default function TabsLayout() {
         name="(home)"
         options={{
           title: t.tabs.home,
-          tabBarIcon: ({ color, size }) => <Home size={22} color={color} />,
+          tabBarIcon: ({ color, size }) => <Home size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="transactions"
         options={{
           title: t.tabs.transactions,
-          tabBarIcon: ({ color, size }) => <ArrowLeftRight size={22} color={color} />,
+          tabBarIcon: ({ color, size }) => <ArrowLeftRight size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="messages"
         options={{
           title: t.tabs.messages,
-          tabBarIcon: ({ color, size }) => <MessageCircle size={22} color={color} />,
+          tabBarIcon: ({ color, size }) => <MessageCircle size={20} color={color} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: t.tabs.profile,
-          tabBarIcon: ({ color, size }) => <User size={22} color={color} />,
+          tabBarIcon: ({ color, size }) => <User size={20} color={color} />,
         }}
       />
     </Tabs>

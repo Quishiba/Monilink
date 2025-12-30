@@ -45,7 +45,7 @@ export const [AppContext, useApp] = createContextHook(() => {
     const loadLanguage = async () => {
       try {
         const stored = await AsyncStorage.getItem('app_language');
-        if (stored && (stored === 'fr' || stored === 'en')) {
+        if (stored && (stored === 'fr' || stored === 'en' || stored === 'de')) {
           setLanguage(stored as Language);
           setT(getTranslations(stored as Language));
         }
