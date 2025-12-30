@@ -5,7 +5,7 @@ import { ArrowLeft, Shield, MessageCircle, CheckCircle, Clock, AlertCircle } fro
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { getCurrencyInfo } from '@/constants/currencies';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TransactionStatus } from '@/types';
 
 const STATUS_CONFIG: Record<TransactionStatus, { label: string; color: string; icon: any }> = {
@@ -22,16 +22,26 @@ const STATUS_CONFIG: Record<TransactionStatus, { label: string; color: string; i
 export default function TransactionScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { offers, transactions, createTransaction, updateTransactionStatus, kycData } = useApp();
+  const { offers, transactions, createTransaction, updateTransactionStatus, kycData, currentUser } = useApp();
 
   const existingTransaction = transactions.find(tx => tx.id === id);
   const offer = offers.find(o => o.id === id);
 
   const [transaction, setTransaction] = useState(() => {
     if (existingTransaction) return existingTransaction;
-    if (offer) return createTransaction(offer.id);
     return null;
   });
+
+  useEffect(() => {
+    if (!transaction && offer && currentUser) {
+      try {
+        const newTransaction = createTransaction(offer.id);
+        setTransaction(newTransaction);
+      } catch (error) {
+        console.error('Failed to create transaction:', error);
+      }
+    }
+  }, [transaction, offer, currentUser, createTransaction]);
 
   if (!transaction) {
     return (
