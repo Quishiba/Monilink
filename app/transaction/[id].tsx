@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Shield, MessageCircle, CheckCircle, Clock, AlertCircle } from 'lucide-react-native';
@@ -22,7 +22,9 @@ const STATUS_CONFIG: Record<TransactionStatus, { label: string; color: string; i
 export default function TransactionScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { offers, transactions, createTransaction, updateTransactionStatus, kycData, currentUser } = useApp();
+  const { offers, transactions, createTransaction, updateTransactionStatus, kycData, currentUser, isAuthenticated, t } = useApp();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showKycModal, setShowKycModal] = useState(false);
 
   const existingTransaction = transactions.find(tx => tx.id === id);
   const offer = offers.find(o => o.id === id);
@@ -43,7 +45,7 @@ export default function TransactionScreen() {
     }
   }, [transaction, offer, currentUser, createTransaction]);
 
-  if (!transaction) {
+  if (!transaction && !offer) {
     return (
       <View style={styles.container}>
         <Stack.Screen options={{ headerShown: false }} />
@@ -54,54 +56,104 @@ export default function TransactionScreen() {
     );
   }
 
-  const giveInfo = getCurrencyInfo(transaction.giveCurrency);
-  const getInfo = getCurrencyInfo(transaction.getCurrency);
-  const statusConfig = STATUS_CONFIG[transaction.status];
+  const displayData = transaction || {
+    id: offer!.id,
+    offerId: offer!.id,
+    userA: offer!.user,
+    userB: currentUser || {} as any,
+    giveCurrency: offer!.giveCurrency,
+    giveAmount: offer!.giveAmount,
+    getCurrency: offer!.getCurrency,
+    getAmount: offer!.getAmount,
+    rate: offer!.rate,
+    status: 'proposed' as const,
+    paymentMethod: offer!.paymentMethods[0],
+    createdAt: offer!.createdAt,
+    updatedAt: offer!.createdAt,
+  };
+
+  const giveInfo = getCurrencyInfo(displayData.giveCurrency);
+  const getInfo = getCurrencyInfo(displayData.getCurrency);
+  const statusConfig = STATUS_CONFIG[displayData.status];
   const StatusIcon = statusConfig.icon;
 
-  const checkKycAndProceed = (action: () => void, actionName: string) => {
+  const getDisplayName = (user: any) => {
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName.charAt(0)}.`;
+    }
+    if (user.name) {
+      const parts = user.name.split(' ');
+      if (parts.length >= 2) {
+        return `${parts[0]} ${parts[1].charAt(0)}.`;
+      }
+      return user.name;
+    }
+    return 'User';
+  };
+
+  const handleAcceptExchange = () => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
     if (kycData.status !== 'verified') {
-      Alert.alert(
-        'Vérification requise',
-        'Veuillez vérifier votre identité pour continuer cet échange.',
-        [
-          { text: 'Annuler', style: 'cancel' },
-          { 
-            text: 'Vérifier maintenant', 
-            onPress: () => router.push('/kyc-verification')
-          }
-        ]
-      );
+      setShowKycModal(true);
+      return;
+    }
+    if (!transaction) {
+      try {
+        const newTransaction = createTransaction(offer!.id);
+        setTransaction(newTransaction);
+        updateTransactionStatus(newTransaction.id, 'accepted');
+      } catch (error) {
+        console.error('Failed to create transaction:', error);
+      }
+    } else {
+      updateTransactionStatus(transaction.id, 'accepted');
+      setTransaction({ ...transaction, status: 'accepted' });
+    }
+  };
+
+  const handleOpenChat = () => {
+    router.push(`/chat/${displayData.id}`);
+  };
+
+  const checkKycAndProceed = (action: () => void, actionName: string) => {
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+    if (kycData.status !== 'verified') {
+      setShowKycModal(true);
       return;
     }
     action();
   };
 
-  const handleAccept = () => {
-    checkKycAndProceed(() => {
-      updateTransactionStatus(transaction.id, 'accepted');
-      setTransaction({ ...transaction, status: 'accepted' });
-    }, 'accept');
-  };
-
   const handleStartProgress = () => {
     checkKycAndProceed(() => {
-      updateTransactionStatus(transaction.id, 'in_progress');
-      setTransaction({ ...transaction, status: 'in_progress' });
+      if (transaction) {
+        updateTransactionStatus(transaction.id, 'in_progress');
+        setTransaction({ ...transaction, status: 'in_progress' });
+      }
     }, 'start');
   };
 
   const handleSubmitProof = () => {
     checkKycAndProceed(() => {
-      updateTransactionStatus(transaction.id, 'proof_submitted');
-      setTransaction({ ...transaction, status: 'proof_submitted' });
+      if (transaction) {
+        updateTransactionStatus(transaction.id, 'proof_submitted');
+        setTransaction({ ...transaction, status: 'proof_submitted' });
+      }
     }, 'proof');
   };
 
   const handleValidate = () => {
     checkKycAndProceed(() => {
-      updateTransactionStatus(transaction.id, 'completed');
-      setTransaction({ ...transaction, status: 'completed' });
+      if (transaction) {
+        updateTransactionStatus(transaction.id, 'completed');
+        setTransaction({ ...transaction, status: 'completed' });
+      }
     }, 'validate');
   };
 
@@ -138,7 +190,7 @@ export default function TransactionScreen() {
                 <View>
                   <Text style={styles.currencyLabel}>Sending</Text>
                   <Text style={styles.currencyAmount}>
-                    {transaction.giveAmount.toLocaleString()} {transaction.giveCurrency}
+                    {displayData.giveAmount.toLocaleString()} {displayData.giveCurrency}
                   </Text>
                 </View>
               </View>
@@ -152,7 +204,7 @@ export default function TransactionScreen() {
                 <View>
                   <Text style={styles.currencyLabel}>Receiving</Text>
                   <Text style={styles.currencyAmount}>
-                    {transaction.getAmount.toLocaleString()} {transaction.getCurrency}
+                    {displayData.getAmount.toLocaleString()} {displayData.getCurrency}
                   </Text>
                 </View>
               </View>
@@ -160,13 +212,13 @@ export default function TransactionScreen() {
 
             <View style={styles.rateInfo}>
               <Text style={styles.rateLabel}>Rate</Text>
-              <Text style={styles.rateValue}>1 {transaction.giveCurrency} = {transaction.rate.toFixed(4)} {transaction.getCurrency}</Text>
+              <Text style={styles.rateValue}>1 {displayData.giveCurrency} = {displayData.rate.toFixed(4)} {displayData.getCurrency}</Text>
             </View>
 
             <View style={styles.methodInfo}>
               <Text style={styles.methodLabel}>Payment Method</Text>
               <View style={styles.methodBadge}>
-                <Text style={styles.methodText}>{transaction.paymentMethod}</Text>
+                <Text style={styles.methodText}>{displayData.paymentMethod}</Text>
               </View>
             </View>
           </View>
@@ -176,35 +228,37 @@ export default function TransactionScreen() {
             
             <View style={styles.partyRow}>
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{transaction.userA.name[0]}</Text>
+                <Text style={styles.avatarText}>{displayData.userA.name ? displayData.userA.name[0] : 'U'}</Text>
               </View>
               <View style={styles.partyInfo}>
                 <View style={styles.nameRow}>
-                  <Text style={styles.partyName}>{transaction.userA.name}</Text>
-                  {transaction.userA.kycStatus === 'verified' && (
+                  <Text style={styles.partyName}>{getDisplayName(displayData.userA)}</Text>
+                  {displayData.userA.kycStatus === 'verified' && (
                     <Shield size={14} color={colors.dark.secondary} />
                   )}
                 </View>
-                <Text style={styles.partyStats}>⭐ {transaction.userA.rating} • {transaction.userA.completedSwaps} swaps</Text>
+                <Text style={styles.partyStats}>⭐ {displayData.userA.rating} • {displayData.userA.completedSwaps} swaps</Text>
               </View>
             </View>
 
             <View style={styles.divider} />
 
-            <View style={styles.partyRow}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{transaction.userB.name[0]}</Text>
-              </View>
-              <View style={styles.partyInfo}>
-                <View style={styles.nameRow}>
-                  <Text style={styles.partyName}>{transaction.userB.name}</Text>
-                  {transaction.userB.kycStatus === 'verified' && (
-                    <Shield size={14} color={colors.dark.secondary} />
-                  )}
+            {displayData.userB.name && (
+              <View style={styles.partyRow}>
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarText}>{displayData.userB.name[0]}</Text>
                 </View>
-                <Text style={styles.partyStats}>⭐ {transaction.userB.rating} • {transaction.userB.completedSwaps} swaps</Text>
+                <View style={styles.partyInfo}>
+                  <View style={styles.nameRow}>
+                    <Text style={styles.partyName}>{getDisplayName(displayData.userB)}</Text>
+                    {displayData.userB.kycStatus === 'verified' && (
+                      <Shield size={14} color={colors.dark.secondary} />
+                    )}
+                  </View>
+                  <Text style={styles.partyStats}>⭐ {displayData.userB.rating} • {displayData.userB.completedSwaps} swaps</Text>
+                </View>
               </View>
-            </View>
+            )}
           </View>
 
           <View style={styles.timelineCard}>
@@ -215,27 +269,27 @@ export default function TransactionScreen() {
                 icon={CheckCircle}
                 title="Transaction Proposed"
                 completed
-                timestamp={new Date(transaction.createdAt).toLocaleString()}
+                timestamp={new Date(displayData.createdAt).toLocaleString()}
               />
               <TimelineItem
                 icon={CheckCircle}
                 title="Accepted by Counterparty"
-                completed={['accepted', 'in_progress', 'proof_submitted', 'validated', 'completed'].includes(transaction.status)}
+                completed={!!transaction && ['accepted', 'in_progress', 'proof_submitted', 'validated', 'completed'].includes(transaction.status)}
               />
               <TimelineItem
                 icon={Clock}
                 title="Payment in Progress"
-                completed={['in_progress', 'proof_submitted', 'validated', 'completed'].includes(transaction.status)}
+                completed={!!transaction && ['in_progress', 'proof_submitted', 'validated', 'completed'].includes(transaction.status)}
               />
               <TimelineItem
                 icon={AlertCircle}
                 title="Proof Submitted"
-                completed={['proof_submitted', 'validated', 'completed'].includes(transaction.status)}
+                completed={!!transaction && ['proof_submitted', 'validated', 'completed'].includes(transaction.status)}
               />
               <TimelineItem
                 icon={CheckCircle}
                 title="Transaction Completed"
-                completed={transaction.status === 'completed'}
+                completed={transaction?.status === 'completed'}
                 isLast
               />
             </View>
@@ -243,32 +297,97 @@ export default function TransactionScreen() {
         </ScrollView>
 
         <View style={styles.footer}>
-          {transaction.status === 'proposed' && (
-            <TouchableOpacity style={styles.actionButton} onPress={handleAccept}>
+          {(!transaction || transaction.status === 'proposed') && (
+            <TouchableOpacity style={styles.actionButton} onPress={handleAcceptExchange}>
               <Text style={styles.actionButtonText}>Accept Exchange</Text>
             </TouchableOpacity>
           )}
-          {transaction.status === 'accepted' && (
+          {transaction && transaction.status === 'accepted' && (
             <TouchableOpacity style={styles.actionButton} onPress={handleStartProgress}>
               <Text style={styles.actionButtonText}>Start Payment</Text>
             </TouchableOpacity>
           )}
-          {transaction.status === 'in_progress' && (
+          {transaction && transaction.status === 'in_progress' && (
             <TouchableOpacity style={styles.actionButton} onPress={handleSubmitProof}>
               <Text style={styles.actionButtonText}>Submit Proof</Text>
             </TouchableOpacity>
           )}
-          {transaction.status === 'proof_submitted' && (
+          {transaction && transaction.status === 'proof_submitted' && (
             <TouchableOpacity style={styles.actionButton} onPress={handleValidate}>
               <Text style={styles.actionButtonText}>Confirm Receipt</Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity style={styles.chatButton} onPress={() => router.push(`/chat/${transaction.id}`)}>
+          <TouchableOpacity style={styles.chatButton} onPress={handleOpenChat}>
             <MessageCircle size={20} color={colors.dark.text} />
             <Text style={styles.chatButtonText}>Open Chat</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
+
+      <Modal
+        visible={showAuthModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowAuthModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.authModalContent}>
+            <Text style={styles.authModalTitle}>{t?.auth?.loginRequired || 'Login Required'}</Text>
+            <Text style={styles.authModalMessage}>{t?.auth?.loginRequiredMessage || 'Please login to accept this exchange.'}</Text>
+            <TouchableOpacity
+              style={styles.authModalButton}
+              onPress={() => {
+                setShowAuthModal(false);
+                router.push('/login');
+              }}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.authModalButtonText}>{t?.auth?.login || 'Login'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.authModalButtonSecondary}
+              onPress={() => {
+                setShowAuthModal(false);
+                router.push('/register');
+              }}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.authModalButtonSecondaryText}>{t?.auth?.signup || 'Sign Up'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showKycModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowKycModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.authModalContent}>
+            <Text style={styles.authModalTitle}>{t?.auth?.verificationRequired || 'Verification Required'}</Text>
+            <Text style={styles.authModalMessage}>{t?.auth?.verificationRequiredMsg || 'Please verify your account to accept this exchange.'}</Text>
+            <TouchableOpacity
+              style={styles.authModalButton}
+              onPress={() => {
+                setShowKycModal(false);
+                router.push('/kyc-verification');
+              }}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.authModalButtonText}>{t?.auth?.verifyAccount || 'Verify Account'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.authModalButtonSecondary}
+              onPress={() => setShowKycModal(false)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.authModalButtonSecondaryText}>{t?.auth?.later || 'Later'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -571,6 +690,57 @@ const styles = StyleSheet.create({
     borderColor: colors.dark.border,
   },
   chatButtonText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: colors.dark.text,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  authModalContent: {
+    backgroundColor: colors.dark.surface,
+    marginHorizontal: 20,
+    borderRadius: 24,
+    padding: 24,
+    width: '90%',
+    maxWidth: 400,
+  },
+  authModalTitle: {
+    fontSize: 24,
+    fontWeight: '700' as const,
+    color: colors.dark.text,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  authModalMessage: {
+    fontSize: 16,
+    color: colors.dark.textSecondary,
+    marginBottom: 24,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  authModalButton: {
+    backgroundColor: colors.dark.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  authModalButtonText: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: colors.dark.text,
+  },
+  authModalButtonSecondary: {
+    backgroundColor: colors.dark.surfaceLight,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  authModalButtonSecondaryText: {
     fontSize: 16,
     fontWeight: '600' as const,
     color: colors.dark.text,

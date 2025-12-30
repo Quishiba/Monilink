@@ -60,6 +60,7 @@ export interface Translations {
     name: string;
     firstName: string;
     lastName: string;
+    dateOfBirth: string;
   };
   transaction: {
     title: string;
@@ -217,6 +218,7 @@ export const translations: Record<Language, Translations> = {
       name: 'Nom',
       firstName: 'Prénom',
       lastName: 'Nom de famille',
+      dateOfBirth: 'Date de naissance',
     },
     transaction: {
       title: 'Transaction',
@@ -372,6 +374,7 @@ export const translations: Record<Language, Translations> = {
       name: 'Name',
       firstName: 'First Name',
       lastName: 'Last Name',
+      dateOfBirth: 'Date of Birth',
     },
     transaction: {
       title: 'Transaction',
@@ -527,6 +530,7 @@ export const translations: Record<Language, Translations> = {
       name: 'Name',
       firstName: 'Vorname',
       lastName: 'Nachname',
+      dateOfBirth: 'Geburtsdatum',
     },
     transaction: {
       title: 'Transaktion',

@@ -14,6 +14,7 @@ export const [AppContext, useApp] = createContextHook(() => {
   const [kycData, setKycData] = useState<KYCData>({
     firstName: '',
     lastName: '',
+    dateOfBirth: '',
     phone: '',
     phoneVerified: false,
     address: '',
@@ -66,11 +67,41 @@ export const [AppContext, useApp] = createContextHook(() => {
     }
   };
 
+  const register = async (firstName: string, lastName: string, phone: string, email?: string) => {
+    try {
+      await AsyncStorage.setItem('is_authenticated', 'true');
+      await AsyncStorage.setItem('user_firstName', firstName);
+      await AsyncStorage.setItem('user_lastName', lastName);
+      await AsyncStorage.setItem('user_phone', phone);
+      if (email) await AsyncStorage.setItem('user_email', email);
+      
+      updateKycData({ firstName, lastName, phone });
+      setIsAuthenticated(true);
+      
+      const user = getCurrentUser();
+      user.firstName = firstName;
+      user.lastName = lastName;
+      user.name = `${firstName} ${lastName}`;
+      setCurrentUser(user);
+    } catch (error) {
+      console.error('Failed to register:', error);
+    }
+  };
+
   const login = async () => {
     try {
       await AsyncStorage.setItem('is_authenticated', 'true');
       setIsAuthenticated(true);
-      setCurrentUser(getCurrentUser());
+      
+      const user = getCurrentUser();
+      const storedFirstName = await AsyncStorage.getItem('user_firstName');
+      const storedLastName = await AsyncStorage.getItem('user_lastName');
+      if (storedFirstName && storedLastName) {
+        user.firstName = storedFirstName;
+        user.lastName = storedLastName;
+        user.name = `${storedFirstName} ${storedLastName}`;
+      }
+      setCurrentUser(user);
     } catch (error) {
       console.error('Failed to login:', error);
     }
@@ -126,7 +157,23 @@ export const [AppContext, useApp] = createContextHook(() => {
   };
 
   const updateKycData = (updates: Partial<KYCData>) => {
-    setKycData(prev => ({ ...prev, ...updates }));
+    setKycData(prev => {
+      const updated = { ...prev, ...updates };
+      
+      if (currentUser) {
+        const updatedUser = { ...currentUser };
+        if (updates.firstName) updatedUser.firstName = updates.firstName;
+        if (updates.lastName) updatedUser.lastName = updates.lastName;
+        if (updates.firstName || updates.lastName) {
+          updatedUser.name = `${updates.firstName || prev.firstName} ${updates.lastName || prev.lastName}`;
+        }
+        if (updates.status) updatedUser.kycStatus = updates.status;
+        updatedUser.kycData = updated;
+        setCurrentUser(updatedUser);
+      }
+      
+      return updated;
+    });
   };
 
   const setKycStep = (step: KYCStep) => {
@@ -191,5 +238,6 @@ export const [AppContext, useApp] = createContextHook(() => {
     changeLanguage,
     login,
     logout,
+    register,
   };
 });

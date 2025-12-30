@@ -18,6 +18,7 @@ export type KYCStep =
 export interface KYCData {
   firstName: string;
   lastName: string;
+  dateOfBirth: string;
   phone: string;
   phoneVerified: boolean;
   address: string;
@@ -48,6 +49,8 @@ export type TransactionStatus =
 export interface User {
   id: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
   avatar?: string;
   rating: number;
   reviewCount: number;

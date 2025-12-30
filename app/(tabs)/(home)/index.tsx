@@ -233,6 +233,17 @@ function OfferCard({ offer }: { offer: Offer }) {
   
   const hoursAgo = Math.floor((Date.now() - new Date(offer.createdAt).getTime()) / (1000 * 60 * 60));
   const timeText = hoursAgo < 1 ? 'Just now' : `${hoursAgo}h ago`;
+  
+  const getDisplayName = (user: typeof offer.user) => {
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName.charAt(0)}.`;
+    }
+    const parts = user.name.split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0]} ${parts[1].charAt(0)}.`;
+    }
+    return user.name;
+  };
 
   return (
     <TouchableOpacity style={styles.offerCard} onPress={() => router.push(`/transaction/${offer.id}`)} activeOpacity={0.7}>
@@ -247,7 +258,7 @@ function OfferCard({ offer }: { offer: Offer }) {
           </View>
           <View>
             <View style={styles.nameRow}>
-              <Text style={styles.userName}>{offer.user.name}</Text>
+              <Text style={styles.userName}>{getDisplayName(offer.user)}</Text>
               {offer.user.kycStatus === 'verified' && (
                 <View style={styles.verifiedBadge}>
                   <Shield size={12} color={colors.dark.secondary} />

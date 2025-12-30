@@ -41,6 +41,7 @@ export default function KYCVerificationScreen() {
         return (
           kycData.firstName.trim() &&
           kycData.lastName.trim() &&
+          kycData.dateOfBirth.trim() &&
           kycData.phone.trim() &&
           kycData.address.trim() &&
           kycData.city.trim() &&
@@ -216,6 +217,17 @@ export default function KYCVerificationScreen() {
                   placeholder="Enter your last name"
                   placeholderTextColor={colors.dark.textSecondary}
                   autoCapitalize="words"
+                />
+              </View>
+
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Date of Birth *</Text>
+                <TextInput
+                  style={styles.input}
+                  value={kycData.dateOfBirth}
+                  onChangeText={(text) => updateKycData({ dateOfBirth: text })}
+                  placeholder="DD/MM/YYYY"
+                  placeholderTextColor={colors.dark.textSecondary}
                 />
               </View>
 

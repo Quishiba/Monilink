@@ -8,7 +8,7 @@ import { useApp } from '@/context/AppContext';
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const { t, login } = useApp();
+  const { t, register } = useApp();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [emailOrPhone, setEmailOrPhone] = useState('');
@@ -35,6 +35,7 @@ export default function RegisterScreen() {
       const isPhone = /^[+]?[\d\s\-()]+$/.test(emailOrPhone);
       
       if (isPhone) {
+        await register(firstName, lastName, emailOrPhone);
         router.push({
           pathname: '/phone-verification',
           params: { 
@@ -43,7 +44,7 @@ export default function RegisterScreen() {
           }
         });
       } else {
-        await login();
+        await register(firstName, lastName, '', emailOrPhone);
         router.replace('/(tabs)/(home)');
       }
     } catch (error) {

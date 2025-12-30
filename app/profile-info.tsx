@@ -109,6 +109,19 @@ export default function ProfileInfoScreen() {
                 <View style={styles.divider} />
 
                 <View style={styles.inputGroup}>
+                  <Text style={styles.label}>{t.profile.dateOfBirth || 'Date of Birth'}</Text>
+                  <TextInput
+                    style={styles.input}
+                    value={kycData.dateOfBirth}
+                    placeholder="DD/MM/YYYY"
+                    placeholderTextColor={colors.dark.textSecondary}
+                    editable={false}
+                  />
+                </View>
+
+                <View style={styles.divider} />
+
+                <View style={styles.inputGroup}>
                   <View style={styles.labelRow}>
                     <Phone size={16} color={colors.dark.textSecondary} />
                     <Text style={styles.label}>{t.profile.phone}</Text>
