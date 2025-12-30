@@ -104,6 +104,7 @@ export interface Translations {
   auth: {
     loginRequired: string;
     loginRequiredMessage: string;
+    loginToAccessProfile: string;
     login: string;
     signup: string;
     guest: string;
@@ -251,6 +252,7 @@ export const translations: Record<Language, Translations> = {
     auth: {
       loginRequired: 'Connexion requise',
       loginRequiredMessage: 'Connectez-vous pour continuer.',
+      loginToAccessProfile: 'Veuillez vous connecter pour accéder à votre profil.',
       login: 'Se connecter',
       signup: 'S\'inscrire',
       guest: 'Invité',
@@ -396,6 +398,7 @@ export const translations: Record<Language, Translations> = {
     auth: {
       loginRequired: 'Login Required',
       loginRequiredMessage: 'Please log in to continue.',
+      loginToAccessProfile: 'Please log in to access your profile.',
       login: 'Log In',
       signup: 'Sign Up',
       guest: 'Guest',
@@ -541,6 +544,7 @@ export const translations: Record<Language, Translations> = {
     auth: {
       loginRequired: 'Anmeldung erforderlich',
       loginRequiredMessage: 'Bitte zuerst einloggen, um fortzufahren.',
+      loginToAccessProfile: 'Bitte melden Sie sich an, um auf Ihr Profil zuzugreifen.',
       login: 'Einloggen',
       signup: 'Registrieren',
       guest: 'Gast',

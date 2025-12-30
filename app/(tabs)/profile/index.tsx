@@ -4,13 +4,21 @@ import { Shield, HelpCircle, LogOut, Globe, ChevronRight, Check, User, Lock, Sta
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { Language } from '@/constants/translations';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
   const { currentUser, kycData, language, t, changeLanguage } = useApp();
   const router = useRouter();
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  useEffect(() => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+    }
+  }, [currentUser]);
 
   if (!currentUser) {
     return (
@@ -19,9 +27,40 @@ export default function ProfileScreen() {
           <View style={styles.header}>
             <Text style={styles.headerTitle}>{t.profile.title}</Text>
           </View>
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>{t.auth.loginRequired}</Text>
-          </View>
+
+          <Modal
+            visible={showAuthModal}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setShowAuthModal(false)}
+          >
+            <View style={styles.authModalOverlay}>
+              <View style={styles.authModalContent}>
+                <Text style={styles.authModalTitle}>{t.auth.loginRequired}</Text>
+                <Text style={styles.authModalMessage}>{t.auth.loginToAccessProfile}</Text>
+                <TouchableOpacity
+                  style={styles.authModalButton}
+                  onPress={() => {
+                    setShowAuthModal(false);
+                    router.push('/login');
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.authModalButtonText}>{t.auth.login}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.authModalButtonSecondary}
+                  onPress={() => {
+                    setShowAuthModal(false);
+                    router.push('/register');
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.authModalButtonSecondaryText}>{t.auth.signup}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         </SafeAreaView>
       </View>
     );
@@ -460,14 +499,55 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.dark.text,
   },
-  emptyContainer: {
+  authModalOverlay: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  emptyText: {
+  authModalContent: {
+    backgroundColor: colors.dark.surface,
+    borderRadius: 24,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+  },
+  authModalTitle: {
+    fontSize: 24,
+    fontWeight: '700' as const,
+    color: colors.dark.text,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  authModalMessage: {
     fontSize: 16,
     color: colors.dark.textSecondary,
+    marginBottom: 24,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  authModalButton: {
+    backgroundColor: colors.dark.primary,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  authModalButtonText: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: colors.dark.text,
+  },
+  authModalButtonSecondary: {
+    backgroundColor: colors.dark.surfaceLight,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  authModalButtonSecondaryText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: colors.dark.text,
   },
 });

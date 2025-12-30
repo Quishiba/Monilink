@@ -99,21 +99,18 @@ export default function HomeScreen() {
               <Text style={styles.rateSubtext}>
                 1 {mainRate.from} = {mainRate.rate.toFixed(0)} {mainRate.to}
               </Text>
+              <View style={styles.rateDivider} />
+              <View style={styles.avgTimeRow}>
+                <Clock size={16} color={colors.dark.secondary} />
+                <View style={styles.avgTimeContent}>
+                  <Text style={styles.avgTimeLabel}>{t.home.avgTime}</Text>
+                  <Text style={styles.avgTimeValue}>≈ 15 min</Text>
+                </View>
+              </View>
             </TouchableOpacity>
           )}
 
-          <View style={styles.statsContainer}>
-            <View style={styles.statCard}>
-              <Shield size={20} color={colors.dark.secondary} />
-              <Text style={styles.statValue}>99.2%</Text>
-              <Text style={styles.statLabel}>{t.home.successRate}</Text>
-            </View>
-            <View style={styles.statCard}>
-              <Clock size={20} color={colors.dark.secondary} />
-              <Text style={styles.statValue}>12 min</Text>
-              <Text style={styles.statLabel}>{t.home.avgTime}</Text>
-            </View>
-          </View>
+
 
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>{t.home.activeOffers}</Text>
@@ -365,29 +362,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 40,
   },
-  statsContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    gap: 12,
-    marginBottom: 24,
-  },
-  statCard: {
-    flex: 1,
-    backgroundColor: colors.dark.surface,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    gap: 8,
-  },
-  statValue: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-    color: colors.dark.text,
-  },
-  statLabel: {
-    fontSize: 12,
-    color: colors.dark.textSecondary,
-  },
+
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -585,6 +560,30 @@ const styles = StyleSheet.create({
   rateSubtext: {
     fontSize: 14,
     color: colors.dark.textSecondary,
+  },
+  rateDivider: {
+    height: 1,
+    backgroundColor: colors.dark.border,
+    marginTop: 16,
+    marginBottom: 12,
+  },
+  avgTimeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  avgTimeContent: {
+    flex: 1,
+  },
+  avgTimeLabel: {
+    fontSize: 12,
+    color: colors.dark.textSecondary,
+    marginBottom: 2,
+  },
+  avgTimeValue: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: colors.dark.text,
   },
   modalOverlay: {
     flex: 1,
