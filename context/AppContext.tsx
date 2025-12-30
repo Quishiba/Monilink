@@ -1,5 +1,5 @@
 import createContextHook from '@nkzw/create-context-hook';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Offer, Transaction, KYCData, KYCStep, User } from '@/types';
 import { MOCK_OFFERS } from '@/mocks/offers';
@@ -141,9 +141,35 @@ export const [AppContext, useApp] = createContextHook(() => {
     }));
   };
 
-  const verifyPhone = () => {
+  const verifyPhone = useCallback(() => {
     setKycData(prev => ({ ...prev, phoneVerified: true }));
-  };
+    if (currentUser) {
+      setCurrentUser(prev => prev ? { ...prev, kycData: { ...prev.kycData!, phoneVerified: true } } : null);
+    }
+  }, [currentUser]);
+
+  const sendPhoneVerification = useCallback(async (phoneNumber: string) => {
+    try {
+      console.log('Sending SMS verification to:', phoneNumber);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return { success: true, message: 'Code sent successfully' };
+    } catch (error) {
+      console.error('Failed to send verification:', error);
+      return { success: false, message: 'Failed to send code' };
+    }
+  }, []);
+
+  const verifyPhoneCode = useCallback(async (phoneNumber: string, code: string) => {
+    try {
+      console.log('Verifying code:', code, 'for:', phoneNumber);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      verifyPhone();
+      return { success: true, message: 'Phone verified' };
+    } catch (error) {
+      console.error('Failed to verify code:', error);
+      return { success: false, message: 'Invalid code' };
+    }
+  }, [verifyPhone]);
 
   return {
     offers,
@@ -160,6 +186,8 @@ export const [AppContext, useApp] = createContextHook(() => {
     setKycStep,
     submitKyc,
     verifyPhone,
+    sendPhoneVerification,
+    verifyPhoneCode,
     changeLanguage,
     login,
     logout,

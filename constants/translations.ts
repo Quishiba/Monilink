@@ -130,6 +130,15 @@ export interface Translations {
     verificationRequiredMsg: string;
     verifyAccount: string;
     later: string;
+    verifyPhone: string;
+    verifyPhoneSubtitle: string;
+    enterCode: string;
+    codeSent: string;
+    resendCode: string;
+    verifyAndContinue: string;
+    phoneNumber: string;
+    sendCode: string;
+    codeNotReceived: string;
   };
   common: {
     save: string;
@@ -278,6 +287,15 @@ export const translations: Record<Language, Translations> = {
       verificationRequiredMsg: 'Veuillez vérifier votre compte pour continuer',
       verifyAccount: 'Vérifier le compte',
       later: 'Plus tard',
+      verifyPhone: 'Vérifier le téléphone',
+      verifyPhoneSubtitle: 'Entrez le code envoyé à votre numéro',
+      enterCode: 'Entrez le code',
+      codeSent: 'Code envoyé',
+      resendCode: 'Renvoyer le code',
+      verifyAndContinue: 'Vérifier et continuer',
+      phoneNumber: 'Numéro de téléphone',
+      sendCode: 'Envoyer le code',
+      codeNotReceived: 'Vous n\'avez pas reçu le code?',
     },
     common: {
       save: 'Enregistrer',
@@ -424,6 +442,15 @@ export const translations: Record<Language, Translations> = {
       verificationRequiredMsg: 'Please verify your account to continue',
       verifyAccount: 'Verify Account',
       later: 'Later',
+      verifyPhone: 'Verify Phone',
+      verifyPhoneSubtitle: 'Enter the code sent to your number',
+      enterCode: 'Enter code',
+      codeSent: 'Code sent',
+      resendCode: 'Resend code',
+      verifyAndContinue: 'Verify and continue',
+      phoneNumber: 'Phone number',
+      sendCode: 'Send code',
+      codeNotReceived: 'Didn\'t receive the code?',
     },
     common: {
       save: 'Save',
@@ -570,6 +597,15 @@ export const translations: Record<Language, Translations> = {
       verificationRequiredMsg: 'Bitte Konto verifizieren, um einen Exchange zu starten',
       verifyAccount: 'Jetzt verifizieren',
       later: 'Später',
+      verifyPhone: 'Telefon verifizieren',
+      verifyPhoneSubtitle: 'Geben Sie den Code ein, der an Ihre Nummer gesendet wurde',
+      enterCode: 'Code eingeben',
+      codeSent: 'Code gesendet',
+      resendCode: 'Code erneut senden',
+      verifyAndContinue: 'Verifizieren und fortfahren',
+      phoneNumber: 'Telefonnummer',
+      sendCode: 'Code senden',
+      codeNotReceived: 'Haben Sie den Code nicht erhalten?',
     },
     common: {
       save: 'Speichern',

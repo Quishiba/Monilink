@@ -32,8 +32,20 @@ export default function RegisterScreen() {
     
     setLoading(true);
     try {
-      await login();
-      router.replace('/(tabs)/(home)');
+      const isPhone = /^[+]?[\d\s\-()]+$/.test(emailOrPhone);
+      
+      if (isPhone) {
+        router.push({
+          pathname: '/phone-verification',
+          params: { 
+            phoneNumber: emailOrPhone,
+            returnTo: '/(tabs)/(home)'
+          }
+        });
+      } else {
+        await login();
+        router.replace('/(tabs)/(home)');
+      }
     } catch (error) {
       console.error('Register error:', error);
     } finally {
