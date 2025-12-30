@@ -82,7 +82,7 @@ export interface Translations {
 export const translations: Record<Language, Translations> = {
   fr: {
     home: {
-      title: 'MoniSwap',
+      title: 'Monilink',
       subtitle: 'Trouvez les meilleurs taux de change',
       searchPlaceholder: 'Rechercher des paires de devises...',
       activeOffers: 'Offres Actives',
@@ -160,7 +160,7 @@ export const translations: Record<Language, Translations> = {
   },
   en: {
     home: {
-      title: 'MoniSwap',
+      title: 'Monilink',
       subtitle: 'Find the best exchange rates',
       searchPlaceholder: 'Search currency pairs...',
       activeOffers: 'Active Offers',

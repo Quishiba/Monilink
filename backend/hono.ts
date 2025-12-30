@@ -19,7 +19,7 @@ app.use(
 );
 
 app.get("/", (c) => {
-  return c.json({ status: "ok", message: "MoniSwap API is running" });
+  return c.json({ status: "ok", message: "Monilink API is running" });
 });
 
 export default app;

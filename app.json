@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "MoniSwap: App d’échange P2P",
-    "slug": "moniswap",
+    "name": "Monilink",
+    "slug": "monilink",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -15,7 +15,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "app.rork.moniswap-app-echange-p2p",
+      "bundleIdentifier": "app.com.monilink",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
         "NSCameraUsageDescription": "Allow $(PRODUCT_NAME) to access your camera",
@@ -27,7 +27,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "app.rork.moniswap_app_echange_p2p",
+      "package": "app.com.monilink",
       "permissions": [
         "CAMERA",
         "READ_EXTERNAL_STORAGE",

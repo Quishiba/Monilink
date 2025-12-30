@@ -16,7 +16,7 @@ export default function HomeScreen() {
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>MoniSwap</Text>
+            <Text style={styles.headerTitle}>Monilink</Text>
             <Text style={styles.headerSubtitle}>Find the best exchange rates</Text>
           </View>
           <TouchableOpacity

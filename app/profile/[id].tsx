@@ -123,7 +123,7 @@ export default function ProfileScreen() {
             <View style={styles.trustContent}>
               <Text style={styles.trustTitle}>Verified User</Text>
               <Text style={styles.trustDescription}>
-                This user has completed identity verification and has a strong reputation on MoniSwap.
+                This user has completed identity verification and has a strong reputation on Monilink.
               </Text>
             </View>
           </View>
