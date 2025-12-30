@@ -7,7 +7,7 @@ export interface Translations {
     searchPlaceholder: string;
     activeOffers: string;
     available: string;
-    avgSavings: string;
+    avgExchangeRate: string;
     successRate: string;
     avgTime: string;
   };
@@ -36,6 +36,30 @@ export interface Translations {
     pending: string;
     verified: string;
     rejected: string;
+    information: string;
+    personalInfo: string;
+    edit: string;
+    verifyIdentity: string;
+    privacySecurity: string;
+    changePassword: string;
+    biometricAuth: string;
+    connectedDevices: string;
+    deleteAccount: string;
+    support: string;
+    faq: string;
+    contactSupport: string;
+    evaluation: string;
+    averageRating: string;
+    totalExchanges: string;
+    receivedReviews: string;
+    termsOfService: string;
+    privacyPolicy: string;
+    email: string;
+    phone: string;
+    address: string;
+    name: string;
+    firstName: string;
+    lastName: string;
   };
   transaction: {
     title: string;
@@ -77,6 +101,27 @@ export interface Translations {
     messages: string;
     profile: string;
   };
+  auth: {
+    loginRequired: string;
+    loginRequiredMessage: string;
+    login: string;
+    signup: string;
+    guest: string;
+  };
+  common: {
+    save: string;
+    cancel: string;
+    delete: string;
+    confirm: string;
+    close: string;
+    back: string;
+    next: string;
+    submit: string;
+    loading: string;
+    error: string;
+    success: string;
+    security: string;
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -87,7 +132,7 @@ export const translations: Record<Language, Translations> = {
       searchPlaceholder: 'Rechercher des paires de devises...',
       activeOffers: 'Offres Actives',
       available: 'disponibles',
-      avgSavings: 'Économies Moy.',
+      avgExchangeRate: 'Taux de change moyen',
       successRate: 'Taux de Réussite',
       avgTime: 'Temps Moy.',
     },
@@ -116,6 +161,30 @@ export const translations: Record<Language, Translations> = {
       pending: 'En cours de vérification',
       verified: 'Vérifié',
       rejected: 'Refusé',
+      information: 'Informations',
+      personalInfo: 'Informations personnelles',
+      edit: 'Modifier',
+      verifyIdentity: 'Vérifier mon identité',
+      privacySecurity: 'Confidentialité et sécurité',
+      changePassword: 'Changer le mot de passe',
+      biometricAuth: 'Authentification biométrique',
+      connectedDevices: 'Appareils connectés',
+      deleteAccount: 'Supprimer mon compte',
+      support: 'Support',
+      faq: 'FAQ',
+      contactSupport: 'Contacter le support',
+      evaluation: 'Évaluation',
+      averageRating: 'Note moyenne',
+      totalExchanges: 'Nombre d\'échanges',
+      receivedReviews: 'Avis reçus',
+      termsOfService: 'Conditions d\'utilisation',
+      privacyPolicy: 'Politique de confidentialité',
+      email: 'Email',
+      phone: 'Téléphone',
+      address: 'Adresse',
+      name: 'Nom',
+      firstName: 'Prénom',
+      lastName: 'Nom de famille',
     },
     transaction: {
       title: 'Transaction',
@@ -157,6 +226,27 @@ export const translations: Record<Language, Translations> = {
       messages: 'Messages',
       profile: 'Profil',
     },
+    auth: {
+      loginRequired: 'Connexion requise',
+      loginRequiredMessage: 'Connectez-vous pour continuer.',
+      login: 'Se connecter',
+      signup: 'S\'inscrire',
+      guest: 'Invité',
+    },
+    common: {
+      save: 'Enregistrer',
+      cancel: 'Annuler',
+      delete: 'Supprimer',
+      confirm: 'Confirmer',
+      close: 'Fermer',
+      back: 'Retour',
+      next: 'Suivant',
+      submit: 'Soumettre',
+      loading: 'Chargement...',
+      error: 'Erreur',
+      success: 'Succès',
+      security: 'Sécurité',
+    },
   },
   en: {
     home: {
@@ -165,7 +255,7 @@ export const translations: Record<Language, Translations> = {
       searchPlaceholder: 'Search currency pairs...',
       activeOffers: 'Active Offers',
       available: 'available',
-      avgSavings: 'Avg. Savings',
+      avgExchangeRate: 'Avg. exchange rate',
       successRate: 'Success Rate',
       avgTime: 'Avg. Time',
     },
@@ -194,6 +284,30 @@ export const translations: Record<Language, Translations> = {
       pending: 'Pending Review',
       verified: 'Verified',
       rejected: 'Rejected',
+      information: 'Information',
+      personalInfo: 'Personal Information',
+      edit: 'Edit',
+      verifyIdentity: 'Verify my identity',
+      privacySecurity: 'Privacy & Security',
+      changePassword: 'Change Password',
+      biometricAuth: 'Biometric Authentication',
+      connectedDevices: 'Connected Devices',
+      deleteAccount: 'Delete Account',
+      support: 'Support',
+      faq: 'FAQ',
+      contactSupport: 'Contact Support',
+      evaluation: 'Evaluation',
+      averageRating: 'Average Rating',
+      totalExchanges: 'Total Exchanges',
+      receivedReviews: 'Received Reviews',
+      termsOfService: 'Terms of Service',
+      privacyPolicy: 'Privacy Policy',
+      email: 'Email',
+      phone: 'Phone',
+      address: 'Address',
+      name: 'Name',
+      firstName: 'First Name',
+      lastName: 'Last Name',
     },
     transaction: {
       title: 'Transaction',
@@ -234,6 +348,27 @@ export const translations: Record<Language, Translations> = {
       transactions: 'Transactions',
       messages: 'Messages',
       profile: 'Profile',
+    },
+    auth: {
+      loginRequired: 'Login Required',
+      loginRequiredMessage: 'Please log in to continue.',
+      login: 'Log In',
+      signup: 'Sign Up',
+      guest: 'Guest',
+    },
+    common: {
+      save: 'Save',
+      cancel: 'Cancel',
+      delete: 'Delete',
+      confirm: 'Confirm',
+      close: 'Close',
+      back: 'Back',
+      next: 'Next',
+      submit: 'Submit',
+      loading: 'Loading...',
+      error: 'Error',
+      success: 'Success',
+      security: 'Security',
     },
   },
 };

@@ -9,15 +9,15 @@ import { Offer } from '@/types';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { offers } = useApp();
+  const { offers, t } = useApp();
 
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea} edges={['top']}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.headerTitle}>Monilink</Text>
-            <Text style={styles.headerSubtitle}>Find the best exchange rates</Text>
+            <Text style={styles.headerTitle}>{t.home.title}</Text>
+            <Text style={styles.headerSubtitle}>{t.home.subtitle}</Text>
           </View>
           <TouchableOpacity
             style={styles.createButton}
@@ -31,7 +31,7 @@ export default function HomeScreen() {
           <Search size={20} color={colors.dark.textSecondary} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search currency pairs..."
+            placeholder={t.home.searchPlaceholder}
             placeholderTextColor={colors.dark.textSecondary}
           />
         </View>
@@ -45,23 +45,23 @@ export default function HomeScreen() {
             <View style={styles.statCard}>
               <TrendingUp size={20} color={colors.dark.secondary} />
               <Text style={styles.statValue}>4.8%</Text>
-              <Text style={styles.statLabel}>Avg. Savings</Text>
+              <Text style={styles.statLabel}>{t.home.avgExchangeRate}</Text>
             </View>
             <View style={styles.statCard}>
               <Shield size={20} color={colors.dark.secondary} />
               <Text style={styles.statValue}>99.2%</Text>
-              <Text style={styles.statLabel}>Success Rate</Text>
+              <Text style={styles.statLabel}>{t.home.successRate}</Text>
             </View>
             <View style={styles.statCard}>
               <Clock size={20} color={colors.dark.secondary} />
               <Text style={styles.statValue}>12 min</Text>
-              <Text style={styles.statLabel}>Avg. Time</Text>
+              <Text style={styles.statLabel}>{t.home.avgTime}</Text>
             </View>
           </View>
 
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Active Offers</Text>
-            <Text style={styles.sectionCount}>{offers.length} available</Text>
+            <Text style={styles.sectionTitle}>{t.home.activeOffers}</Text>
+            <Text style={styles.sectionCount}>{offers.length} {t.home.available}</Text>
           </View>
 
           {offers.map(offer => (

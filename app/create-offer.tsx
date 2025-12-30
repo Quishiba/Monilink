@@ -25,7 +25,7 @@ export default function CreateOfferScreen() {
     }
   }, [kycData.status, router]);
 
-  if (kycData.status !== 'verified') {
+  if (kycData.status !== 'verified' || !currentUser) {
     return null;
   }
 

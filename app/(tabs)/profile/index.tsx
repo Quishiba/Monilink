@@ -1,18 +1,31 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Shield, Settings, Bell, HelpCircle, LogOut, Globe, ChevronRight, Check } from 'lucide-react-native';
+import { Shield, HelpCircle, LogOut, Globe, ChevronRight, Check, User, Lock, Star, FileText, ShieldCheck } from 'lucide-react-native';
 import colors from '@/constants/colors';
-import { getCurrentUser } from '@/mocks/users';
 import { useApp } from '@/context/AppContext';
 import { Language } from '@/constants/translations';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
-  const currentUser = getCurrentUser();
+  const { currentUser, kycData, language, t, changeLanguage } = useApp();
   const router = useRouter();
-  const { kycData, language, t, changeLanguage } = useApp();
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+
+  if (!currentUser) {
+    return (
+      <View style={styles.container}>
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>{t.profile.title}</Text>
+          </View>
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>{t.auth.loginRequired}</Text>
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
 
   const getKycStatusLabel = () => {
     switch (kycData.status) {
@@ -48,9 +61,12 @@ export default function ProfileScreen() {
   };
 
   const menuItems = [
-    { icon: Settings, label: t.profile.settings, onPress: () => {} },
-    { icon: Bell, label: t.profile.notifications, onPress: () => {} },
-    { icon: HelpCircle, label: t.profile.help, onPress: () => {} },
+    { icon: User, label: t.profile.information, onPress: () => router.push('/profile-info') },
+    { icon: Lock, label: t.profile.privacySecurity, onPress: () => router.push('/profile-security') },
+    { icon: HelpCircle, label: t.profile.support, onPress: () => router.push('/profile-support') },
+    { icon: Star, label: t.profile.evaluation, onPress: () => router.push('/profile-evaluation') },
+    { icon: FileText, label: t.profile.termsOfService, onPress: () => router.push('/profile-terms') },
+    { icon: ShieldCheck, label: t.profile.privacyPolicy, onPress: () => router.push('/profile-privacy') },
     { icon: LogOut, label: t.profile.logout, onPress: () => {}, color: '#EF4444' },
   ];
 
@@ -443,5 +459,15 @@ const styles = StyleSheet.create({
   languageOptionText: {
     fontSize: 16,
     color: colors.dark.text,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: colors.dark.textSecondary,
   },
 });

@@ -65,6 +65,21 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES);
   const [inputText, setInputText] = useState('');
 
+  if (!currentUser) {
+    return (
+      <View style={styles.container}>
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <ArrowLeft size={24} color={colors.dark.text} />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Chat</Text>
+          </View>
+        </SafeAreaView>
+      </View>
+    );
+  }
+
   const transaction = transactions.find(tx => tx.id === id);
   const otherUser = transaction?.userA.id === currentUser.id ? transaction.userB : transaction?.userA;
 

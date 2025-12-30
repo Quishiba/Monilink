@@ -1,7 +1,7 @@
 import createContextHook from '@nkzw/create-context-hook';
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Offer, Transaction, KYCData, KYCStep } from '@/types';
+import { Offer, Transaction, KYCData, KYCStep, User } from '@/types';
 import { MOCK_OFFERS } from '@/mocks/offers';
 import { getCurrentUser } from '@/mocks/users';
 import { Language, getTranslations, Translations } from '@/constants/translations';
@@ -9,6 +9,8 @@ import { Language, getTranslations, Translations } from '@/constants/translation
 export const [AppContext, useApp] = createContextHook(() => {
   const [offers, setOffers] = useState<Offer[]>(MOCK_OFFERS);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [kycData, setKycData] = useState<KYCData>({
     firstName: '',
     lastName: '',
@@ -23,7 +25,21 @@ export const [AppContext, useApp] = createContextHook(() => {
   });
   const [language, setLanguage] = useState<Language>('fr');
   const [t, setT] = useState<Translations>(getTranslations('fr'));
-  const currentUser = getCurrentUser();
+
+  useEffect(() => {
+    const loadAuthState = async () => {
+      try {
+        const authState = await AsyncStorage.getItem('is_authenticated');
+        if (authState === 'true') {
+          setIsAuthenticated(true);
+          setCurrentUser(getCurrentUser());
+        }
+      } catch (error) {
+        console.error('Failed to load auth state:', error);
+      }
+    };
+    loadAuthState();
+  }, []);
 
   useEffect(() => {
     const loadLanguage = async () => {
@@ -50,6 +66,26 @@ export const [AppContext, useApp] = createContextHook(() => {
     }
   };
 
+  const login = async () => {
+    try {
+      await AsyncStorage.setItem('is_authenticated', 'true');
+      setIsAuthenticated(true);
+      setCurrentUser(getCurrentUser());
+    } catch (error) {
+      console.error('Failed to login:', error);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      await AsyncStorage.removeItem('is_authenticated');
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+    } catch (error) {
+      console.error('Failed to logout:', error);
+    }
+  };
+
   const addOffer = (offer: Offer) => {
     setOffers(prev => [offer, ...prev]);
   };
@@ -57,6 +93,7 @@ export const [AppContext, useApp] = createContextHook(() => {
   const createTransaction = (offerId: string): Transaction => {
     const offer = offers.find(o => o.id === offerId);
     if (!offer) throw new Error('Offer not found');
+    if (!currentUser) throw new Error('User not authenticated');
 
     const transaction: Transaction = {
       id: `tx${Date.now()}`,
@@ -115,6 +152,7 @@ export const [AppContext, useApp] = createContextHook(() => {
     kycData,
     language,
     t,
+    isAuthenticated,
     addOffer,
     createTransaction,
     updateTransactionStatus,
@@ -123,5 +161,7 @@ export const [AppContext, useApp] = createContextHook(() => {
     submitKyc,
     verifyPhone,
     changeLanguage,
+    login,
+    logout,
   };
 });
