@@ -21,7 +21,11 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login();
-      router.back();
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/');
+      }
     } catch (error) {
       console.error('Login error:', error);
     } finally {
@@ -45,7 +49,13 @@ export default function LoginScreen() {
           >
             <TouchableOpacity 
               style={styles.backButton}
-              onPress={() => router.back()}
+              onPress={() => {
+                if (router.canGoBack()) {
+                  router.back();
+                } else {
+                  router.replace('/');
+                }
+              }}
               activeOpacity={0.7}
             >
               <ArrowLeft size={24} color={colors.dark.text} />
