@@ -15,10 +15,14 @@ function getAuthHeader(): string {
 
 export async function sendVerificationCode(phoneNumber: string): Promise<SMSVerificationResponse> {
   try {
-    console.log('Sending verification code to:', phoneNumber);
+    console.log('=== TWILIO VERIFY - SENDING CODE ===');
+    console.log('Phone Number:', phoneNumber);
+    console.log('Service SID configured:', !!TWILIO_VERIFY_SERVICE_SID);
+    console.log('Account SID configured:', !!TWILIO_ACCOUNT_SID);
+    console.log('Auth Token configured:', !!TWILIO_AUTH_TOKEN);
     
     if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_VERIFY_SERVICE_SID) {
-      console.error('Twilio credentials not configured');
+      console.error('❌ Twilio credentials not configured');
       return {
         success: false,
         message: 'SMS service not configured'
@@ -26,9 +30,13 @@ export async function sendVerificationCode(phoneNumber: string): Promise<SMSVeri
     }
 
     const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+    console.log('Formatted phone number:', formattedPhone);
+    
+    const url = `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/Verifications`;
+    console.log('API URL:', url);
     
     const response = await fetch(
-      `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/Verifications`,
+      url,
       {
         method: 'POST',
         headers: {
@@ -40,9 +48,15 @@ export async function sendVerificationCode(phoneNumber: string): Promise<SMSVeri
     );
 
     const data = await response.json();
+    console.log('Response status:', response.status);
+    console.log('Response data:', JSON.stringify(data, null, 2));
     
     if (response.ok && data.status === 'pending') {
-      console.log('Verification code sent successfully:', data.sid);
+      console.log('✅ SUCCESS: Verification code sent via SMS');
+      console.log('Verification SID:', data.sid);
+      console.log('Status:', data.status);
+      console.log('To:', data.to);
+      console.log('Channel:', data.channel);
       return {
         success: true,
         message: 'Verification code sent',
@@ -50,13 +64,16 @@ export async function sendVerificationCode(phoneNumber: string): Promise<SMSVeri
       };
     }
     
-    console.error('Twilio API error:', data);
+    console.error('❌ TWILIO API ERROR');
+    console.error('Status:', response.status);
+    console.error('Error data:', JSON.stringify(data, null, 2));
     return {
       success: false,
       message: data.message || 'Failed to send code'
     };
   } catch (error) {
-    console.error('Failed to send verification code:', error);
+    console.error('❌ EXCEPTION while sending verification code');
+    console.error('Error:', error);
     return {
       success: false,
       message: 'Failed to send code'
@@ -66,14 +83,17 @@ export async function sendVerificationCode(phoneNumber: string): Promise<SMSVeri
 
 export async function verifyCode(phoneNumber: string, code: string): Promise<boolean> {
   try {
-    console.log('Verifying code:', code, 'for phone:', phoneNumber);
+    console.log('=== TWILIO VERIFY - CHECKING CODE ===');
+    console.log('Phone Number:', phoneNumber);
+    console.log('Code:', code);
     
     if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_VERIFY_SERVICE_SID) {
-      console.error('Twilio credentials not configured');
+      console.error('❌ Twilio credentials not configured');
       return false;
     }
 
     const formattedPhone = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+    console.log('Formatted phone number:', formattedPhone);
     
     const response = await fetch(
       `https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}/VerificationCheck`,
@@ -88,16 +108,19 @@ export async function verifyCode(phoneNumber: string, code: string): Promise<boo
     );
 
     const data = await response.json();
+    console.log('Verification response status:', response.status);
+    console.log('Verification response data:', JSON.stringify(data, null, 2));
     
     if (response.ok && data.status === 'approved') {
-      console.log('Verification successful');
+      console.log('✅ CODE VERIFIED SUCCESSFULLY');
       return true;
     }
     
-    console.error('Verification failed:', data);
+    console.error('❌ VERIFICATION FAILED');
+    console.error('Response:', JSON.stringify(data, null, 2));
     return false;
   } catch (error) {
-    console.error('Failed to verify code:', error);
+    console.error('❌ Failed to verify code:', error);
     return false;
   }
 }
