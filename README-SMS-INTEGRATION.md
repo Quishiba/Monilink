@@ -1,65 +1,54 @@
 # SMS Phone Verification Integration Guide
 
-This app includes a complete phone verification system. To use it with a real SMS service, follow these steps:
+This app includes a complete phone verification system integrated with **Twilio Verify**.
 
-## Setup Instructions
+## ✅ Current Setup: Twilio Verify
 
-### Option 1: Twilio (Popular & Free Trial)
+The app is **already integrated** with Twilio Verify API. The following environment variables are configured:
+
+- `EXPO_PUBLIC_TWILIO_ACCOUNT_SID`
+- `EXPO_PUBLIC_TWILIO_AUTH_TOKEN`
+- `EXPO_PUBLIC_TWILIO_VERIFY_SERVICE_SID`
+
+### How It Works
+
+1. **Sending Verification Code**
+   - User enters phone number during registration
+   - App calls `sendVerificationCode()` which uses Twilio Verify API
+   - Twilio sends a 6-digit code via SMS
+   - No need to store codes - Twilio handles everything
+
+2. **Verifying Code**
+   - User enters the 6-digit code
+   - App calls `verifyCode()` which checks with Twilio
+   - Twilio validates and returns approval status
+
+### Setup Your Own Twilio Account
 
 1. **Create a Twilio Account**
    - Sign up at https://www.twilio.com
-   - Get your Account SID and Auth Token
-   - Get a phone number
+   - Get your Account SID and Auth Token from the console
 
-2. **Install Twilio Package**
-   ```bash
-   npm install twilio
-   ```
+2. **Create a Verify Service**
+   - Go to: https://console.twilio.com/us1/develop/verify/services
+   - Click "Create new Service"
+   - Give it a name (e.g., "Monilink")
+   - Copy the Service SID
 
-3. **Add Environment Variables**
-   Add to your `.env` file:
-   ```
-   EXPO_PUBLIC_TWILIO_ACCOUNT_SID=your_account_sid
-   EXPO_PUBLIC_TWILIO_AUTH_TOKEN=your_auth_token
-   EXPO_PUBLIC_TWILIO_PHONE_NUMBER=your_twilio_number
-   ```
+3. **Your Credentials Are Already Set**
+   The environment variables are already configured in the project.
+   Make sure they contain your actual Twilio credentials.
 
-4. **Update `lib/sms-service.ts`**
-   ```typescript
-   import twilio from 'twilio';
+### Phone Number Format
 
-   const client = twilio(
-     process.env.EXPO_PUBLIC_TWILIO_ACCOUNT_SID,
-     process.env.EXPO_PUBLIC_TWILIO_AUTH_TOKEN
-   );
+Twilio requires phone numbers in E.164 format:
+- Must start with `+` and country code
+- Example: `+237612345678` (Cameroon)
+- Example: `+33612345678` (France)
 
-   export async function sendVerificationCode(phoneNumber: string): Promise<SMSVerificationResponse> {
-     try {
-       const code = Math.floor(100000 + Math.random() * 900000).toString();
-       
-       await client.messages.create({
-         body: `Your Monilink verification code is: ${code}`,
-         from: process.env.EXPO_PUBLIC_TWILIO_PHONE_NUMBER,
-         to: phoneNumber
-       });
-       
-       // Store code securely (backend recommended)
-       return {
-         success: true,
-         message: 'Verification code sent',
-         verificationId: `verify_${Date.now()}`
-       };
-     } catch (error) {
-       console.error('Failed to send verification code:', error);
-       return {
-         success: false,
-         message: 'Failed to send code'
-       };
-     }
-   }
-   ```
+The app automatically adds `+` if missing.
 
-### Option 2: Firebase Phone Auth (Free & Easy)
+## Alternative: Firebase Phone Auth
 
 1. **Setup Firebase**
    ```bash
@@ -105,7 +94,7 @@ This app includes a complete phone verification system. To use it with a real SM
    }
    ```
 
-### Option 3: SMS.to (Simple HTTP API)
+## Alternative: SMS.to
 
 1. **Sign up at https://sms.to**
    - Get your API key
@@ -163,14 +152,21 @@ This app includes a complete phone verification system. To use it with a real SM
 4. **Validate phone format** - Check phone number format before sending
 5. **Use HTTPS** - Always use secure connections for API calls
 
-## Testing in Development
+## Testing
 
-The current implementation uses a mock system that:
-- Generates a random 6-digit code
-- Logs it to the console
-- Accepts any valid 6-digit code for verification
+### Development Testing
+The integration uses the **live Twilio Verify API**. During development:
+- Real SMS will be sent to the phone number
+- You'll receive actual verification codes
+- This uses your Twilio credits
 
-This allows you to test the UI without spending SMS credits.
+### Free Testing with Twilio
+Twilio provides:
+- Free trial credits ($15 USD)
+- Verified phone numbers for testing (no SMS sent)
+- Test credentials that log codes to console
+
+To use test mode, add test credentials in Twilio Console.
 
 ## Flow Overview
 

@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { ArrowLeft, CheckSquare, Square } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
+import { sendVerificationCode } from '@/lib/sms-service';
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -19,14 +20,17 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (!firstName.trim() || !lastName.trim() || !emailOrPhone.trim() || !password.trim() || !confirmPassword.trim()) {
+      Alert.alert(t.common.error, 'Please fill in all fields');
       return;
     }
     
     if (password !== confirmPassword) {
+      Alert.alert(t.common.error, 'Passwords do not match');
       return;
     }
 
     if (!agreeToTerms) {
+      Alert.alert(t.common.error, 'Please agree to the terms and conditions');
       return;
     }
     
@@ -35,20 +39,27 @@ export default function RegisterScreen() {
       const isPhone = /^[+]?[\d\s\-()]+$/.test(emailOrPhone);
       
       if (isPhone) {
-        await register(firstName, lastName, emailOrPhone);
-        router.push({
-          pathname: '/phone-verification',
-          params: { 
-            phoneNumber: emailOrPhone,
-            returnTo: '/(tabs)/(home)'
-          }
-        });
+        const result = await sendVerificationCode(emailOrPhone);
+        
+        if (result.success) {
+          await register(firstName, lastName, emailOrPhone);
+          router.push({
+            pathname: '/phone-verification',
+            params: { 
+              phoneNumber: emailOrPhone,
+              returnTo: '/(tabs)/(home)'
+            }
+          });
+        } else {
+          Alert.alert(t.common.error, result.message || 'Failed to send verification code');
+        }
       } else {
         await register(firstName, lastName, '', emailOrPhone);
         router.replace('/(tabs)/(home)');
       }
     } catch (error) {
       console.error('Register error:', error);
+      Alert.alert(t.common.error, 'Registration failed');
     } finally {
       setLoading(false);
     }

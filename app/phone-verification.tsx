@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { ArrowLeft, Phone } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
+import { sendVerificationCode, verifyCode } from '@/lib/sms-service';
 
 export default function PhoneVerificationScreen() {
   const router = useRouter();
@@ -47,31 +48,42 @@ export default function PhoneVerificationScreen() {
   };
 
   const handleVerify = async (verificationCode: string) => {
+    if (!phoneNumber) {
+      Alert.alert(t.common.error, 'Phone number is missing');
+      return;
+    }
+
     setLoading(true);
     try {
       console.log('Verifying phone with code:', verificationCode);
       console.log('Phone number:', phoneNumber);
 
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      const isValid = await verifyCode(phoneNumber, verificationCode);
       
-      verifyPhone();
-      
-      Alert.alert(
-        t.common.success,
-        'Phone verified successfully!',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              if (returnTo) {
-                router.push(returnTo as any);
-              } else {
-                router.back();
+      if (isValid) {
+        verifyPhone();
+        
+        Alert.alert(
+          t.common.success,
+          'Phone verified successfully!',
+          [
+            {
+              text: 'OK',
+              onPress: () => {
+                if (returnTo) {
+                  router.push(returnTo as any);
+                } else {
+                  router.back();
+                }
               }
             }
-          }
-        ]
-      );
+          ]
+        );
+      } else {
+        Alert.alert(t.common.error, 'Invalid verification code. Please try again.');
+        setCode(['', '', '', '', '', '']);
+        inputRefs.current[0]?.focus();
+      }
     } catch (error) {
       console.error('Verification error:', error);
       Alert.alert(t.common.error, 'Invalid verification code');
@@ -81,19 +93,23 @@ export default function PhoneVerificationScreen() {
   };
 
   const handleResend = async () => {
-    if (resendTimer > 0) return;
+    if (resendTimer > 0 || !phoneNumber) return;
     
     setLoading(true);
     try {
       console.log('Resending code to:', phoneNumber);
       
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await sendVerificationCode(phoneNumber);
       
-      setResendTimer(60);
-      setCode(['', '', '', '', '', '']);
-      inputRefs.current[0]?.focus();
-      
-      Alert.alert(t.auth.codeSent, `Code sent to ${phoneNumber}`);
+      if (result.success) {
+        setResendTimer(60);
+        setCode(['', '', '', '', '', '']);
+        inputRefs.current[0]?.focus();
+        
+        Alert.alert(t.auth.codeSent, `Code sent to ${phoneNumber}`);
+      } else {
+        Alert.alert(t.common.error, result.message || 'Failed to resend code');
+      }
     } catch (error) {
       console.error('Resend error:', error);
       Alert.alert(t.common.error, 'Failed to resend code');
