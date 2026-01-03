@@ -5,6 +5,7 @@ import { Offer, Transaction, KYCData, KYCStep, User } from '@/types';
 import { MOCK_OFFERS } from '@/mocks/offers';
 import { getCurrentUser } from '@/mocks/users';
 import { Language, getTranslations, Translations } from '@/constants/translations';
+import { registerForPushNotificationsAsync, sendTransactionStatusNotification, sendKycVerificationNotification } from '@/lib/notification-service';
 
 export const [AppContext, useApp] = createContextHook(() => {
   const [offers, setOffers] = useState<Offer[]>(MOCK_OFFERS);
@@ -26,6 +27,7 @@ export const [AppContext, useApp] = createContextHook(() => {
   });
   const [language, setLanguage] = useState<Language>('fr');
   const [t, setT] = useState<Translations>(getTranslations('fr'));
+  const [pushToken, setPushToken] = useState<string | null>(null);
 
   useEffect(() => {
     const loadAuthState = async () => {
@@ -40,6 +42,21 @@ export const [AppContext, useApp] = createContextHook(() => {
       }
     };
     loadAuthState();
+  }, []);
+
+  useEffect(() => {
+    const setupNotifications = async () => {
+      try {
+        const token = await registerForPushNotificationsAsync();
+        if (token) {
+          setPushToken(token);
+          console.log('Push notification token registered:', token);
+        }
+      } catch (error) {
+        console.error('Failed to setup notifications:', error);
+      }
+    };
+    setupNotifications();
   }, []);
 
   useEffect(() => {
@@ -154,6 +171,9 @@ export const [AppContext, useApp] = createContextHook(() => {
           : tx
       )
     );
+    sendTransactionStatusNotification(status, id).catch(error => {
+      console.error('Failed to send transaction notification:', error);
+    });
   };
 
   const updateKycData = (updates: Partial<KYCData>) => {
@@ -186,6 +206,9 @@ export const [AppContext, useApp] = createContextHook(() => {
       status: 'pending',
       submittedAt: new Date().toISOString(),
     }));
+    sendKycVerificationNotification('pending').catch(error => {
+      console.error('Failed to send KYC notification:', error);
+    });
   };
 
   const verifyPhone = useCallback(() => {
@@ -226,6 +249,7 @@ export const [AppContext, useApp] = createContextHook(() => {
     language,
     t,
     isAuthenticated,
+    pushToken,
     addOffer,
     createTransaction,
     updateTransactionStatus,

@@ -6,6 +6,7 @@ import { ArrowLeft, Send, Paperclip } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { Message } from '@/types';
+import { sendMessageNotification } from '@/lib/notification-service';
 
 const MOCK_MESSAGES: Message[] = [
   {
@@ -83,7 +84,7 @@ export default function ChatScreen() {
   const transaction = transactions.find(tx => tx.id === id);
   const otherUser = transaction?.userA.id === currentUser.id ? transaction.userB : transaction?.userA;
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!inputText.trim()) return;
 
     const newMessage: Message = {
@@ -97,6 +98,20 @@ export default function ChatScreen() {
 
     setMessages(prev => [...prev, newMessage]);
     setInputText('');
+
+    if (otherUser) {
+      const senderName = currentUser.firstName && currentUser.lastName 
+        ? `${currentUser.firstName} ${currentUser.lastName.charAt(0)}.`
+        : currentUser.name;
+      
+      await sendMessageNotification(
+        senderName,
+        inputText.substring(0, 100),
+        id as string
+      ).catch(error => {
+        console.error('Failed to send message notification:', error);
+      });
+    }
   };
 
   return (
