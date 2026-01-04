@@ -95,6 +95,12 @@ export const [AppContext, useApp] = createContextHook(() => {
       await AsyncStorage.setItem('user_phone', phone);
       if (email) await AsyncStorage.setItem('user_email', email);
       
+      if (email === 'fotsingalexias@yahoo.fr') {
+        await AsyncStorage.setItem('is_admin', 'true');
+        setIsAdmin(true);
+        console.log('Admin mode activated for:', email);
+      }
+      
       updateKycData({ firstName, lastName, phone });
       setIsAuthenticated(true);
       
@@ -116,6 +122,14 @@ export const [AppContext, useApp] = createContextHook(() => {
       const user = getCurrentUser();
       const storedFirstName = await AsyncStorage.getItem('user_firstName');
       const storedLastName = await AsyncStorage.getItem('user_lastName');
+      const storedEmail = await AsyncStorage.getItem('user_email');
+      
+      if (storedEmail === 'fotsingalexias@yahoo.fr') {
+        await AsyncStorage.setItem('is_admin', 'true');
+        setIsAdmin(true);
+        console.log('Admin mode activated for:', storedEmail);
+      }
+      
       if (storedFirstName && storedLastName) {
         user.firstName = storedFirstName;
         user.lastName = storedLastName;
