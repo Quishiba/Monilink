@@ -23,6 +23,36 @@ export default function PhoneVerificationScreen() {
     }
   }, [resendTimer]);
 
+  useEffect(() => {
+    const sendInitialCode = async () => {
+      if (!phoneNumber) return;
+      
+      setLoading(true);
+      try {
+        console.log('Sending initial verification code to:', phoneNumber);
+        
+        const result = await sendVerificationCode(phoneNumber);
+        
+        if (result.success) {
+          console.log('✅ Initial code sent successfully');
+          Alert.alert(t.common.success, `Code sent to ${phoneNumber}`);
+        } else {
+          console.error('❌ Failed to send initial code:', result.message);
+          Alert.alert(t.common.error, result.message || 'Failed to send verification code');
+        }
+      } catch (error) {
+        console.error('❌ Error sending initial code:', error);
+        Alert.alert(t.common.error, 'Failed to send verification code');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (phoneNumber) {
+      sendInitialCode();
+    }
+  }, [phoneNumber, t.common.success, t.common.error]);
+
   const handleCodeChange = (value: string, index: number) => {
     if (value.length > 1) {
       value = value[value.length - 1];
