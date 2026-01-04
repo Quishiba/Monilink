@@ -109,6 +109,8 @@ export interface Message {
   type: 'text' | 'system' | 'image';
   timestamp: string;
   imageUrl?: string;
+  isAdmin?: boolean;
+  senderName?: string;
 }
 
 export interface Review {

@@ -1,42 +1,46 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { AdminContext, useAdmin } from '@/context/AdminContext';
-import { MessageSquare, Trash2, AlertTriangle, User } from 'lucide-react-native';
+import { useApp } from '@/context/AppContext';
+import { MessageSquare, AlertTriangle, ArrowRight } from 'lucide-react-native';
 
 function ChatModerationContent() {
   const router = useRouter();
-  const { messages, isLoadingMessages, deleteMessage } = useAdmin();
+  const { messages, isLoadingMessages } = useAdmin();
+  const { transactions } = useApp();
   const [showFlagged, setShowFlagged] = useState(false);
 
-  const handleDeleteMessage = (messageId: string, senderId: string) => {
-    Alert.prompt(
-      'Delete Message',
-      `Enter reason for deleting message from ${senderId}:`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: (reason?: string) => {
-            if (reason && reason.trim()) {
-              deleteMessage(messageId, reason);
-            }
-          },
-        },
-      ],
-      'plain-text'
-    );
-  };
+  const conversationsList = useMemo(() => {
+    const conversationsMap = new Map<string, {
+      transactionId: string;
+      lastMessage: string;
+      lastMessageTime: string;
+      messageCount: number;
+      userAName: string;
+      userBName: string;
+    }>();
 
-  const getMessageTypeColor = (type: string) => {
-    switch (type) {
-      case 'system': return '#6B7280';
-      case 'image': return '#3B82F6';
-      default: return '#111827';
-    }
-  };
+    messages.forEach(message => {
+      const existing = conversationsMap.get(message.transactionId);
+      if (!existing || new Date(message.timestamp) > new Date(existing.lastMessageTime)) {
+        const transaction = transactions.find(t => t.id === message.transactionId);
+        conversationsMap.set(message.transactionId, {
+          transactionId: message.transactionId,
+          lastMessage: message.content,
+          lastMessageTime: message.timestamp,
+          messageCount: (existing?.messageCount || 0) + 1,
+          userAName: transaction?.userA.name || 'User A',
+          userBName: transaction?.userB.name || 'User B',
+        });
+      }
+    });
+
+    return Array.from(conversationsMap.values()).sort(
+      (a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+    );
+  }, [messages, transactions]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -70,70 +74,57 @@ function ChatModerationContent() {
       <ScrollView style={styles.content}>
         {isLoadingMessages ? (
           <View style={styles.loadingContainer}>
-            <Text style={styles.loadingText}>Loading messages...</Text>
+            <Text style={styles.loadingText}>Loading conversations...</Text>
           </View>
-        ) : messages.length === 0 ? (
+        ) : conversationsList.length === 0 ? (
           <View style={styles.emptyContainer}>
             <MessageSquare size={48} color="#D1D5DB" />
-            <Text style={styles.emptyText}>No messages found</Text>
+            <Text style={styles.emptyText}>No conversations found</Text>
           </View>
         ) : (
-          messages.map((message) => (
-            <View key={message.id} style={styles.messageCard}>
-              <View style={styles.messageHeader}>
-                <View style={styles.senderInfo}>
-                  <View style={styles.senderAvatar}>
-                    <User size={20} color="#6B7280" />
-                  </View>
-                  <View style={styles.senderDetails}>
-                    <Text style={styles.senderId}>{message.senderId}</Text>
-                    <Text style={styles.timestamp}>
-                      {new Date(message.timestamp).toLocaleString()}
+          <View>
+            <Text style={styles.sectionTitle}>
+              {conversationsList.length} Conversation{conversationsList.length !== 1 ? 's' : ''}
+            </Text>
+            {conversationsList.map((conversation) => (
+              <TouchableOpacity
+                key={conversation.transactionId}
+                style={styles.conversationCard}
+                onPress={() => router.push(`/chat/${conversation.transactionId}` as any)}
+              >
+                <View style={styles.conversationIcon}>
+                  <MessageSquare size={24} color="#4F46E5" />
+                </View>
+                <View style={styles.conversationContent}>
+                  <View style={styles.conversationHeader}>
+                    <Text style={styles.conversationTitle}>
+                      {conversation.userAName} ↔ {conversation.userBName}
+                    </Text>
+                    <Text style={styles.conversationTime}>
+                      {new Date(conversation.lastMessageTime).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
                     </Text>
                   </View>
-                </View>
-                <View style={[styles.typeBadge, { backgroundColor: getMessageTypeColor(message.type) + '15' }]}>
-                  <Text style={[styles.typeText, { color: getMessageTypeColor(message.type) }]}>
-                    {message.type}
+                  <View style={styles.conversationDetails}>
+                    <Text style={styles.conversationId} numberOfLines={1}>
+                      Transaction: {conversation.transactionId}
+                    </Text>
+                    <View style={styles.messageCountBadge}>
+                      <Text style={styles.messageCountText}>
+                        {conversation.messageCount} msg{conversation.messageCount !== 1 ? 's' : ''}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.lastMessage} numberOfLines={2}>
+                    {conversation.lastMessage}
                   </Text>
                 </View>
-              </View>
-
-              <View style={styles.messageBody}>
-                <View style={styles.transactionInfo}>
-                  <Text style={styles.transactionLabel}>Transaction:</Text>
-                  <Text style={styles.transactionId}>{message.transactionId}</Text>
-                </View>
-
-                <View style={styles.contentContainer}>
-                  <Text style={styles.contentLabel}>Content:</Text>
-                  <Text style={styles.contentText}>{message.content}</Text>
-                </View>
-
-                {message.imageUrl && (
-                  <View style={styles.imageInfo}>
-                    <Text style={styles.imageLabel}>📎 Image attached</Text>
-                  </View>
-                )}
-              </View>
-
-              <View style={styles.messageActions}>
-                <TouchableOpacity
-                  style={styles.viewButton}
-                  onPress={() => router.push(`/chat/${message.transactionId}` as any)}
-                >
-                  <Text style={styles.viewButtonText}>View Chat</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => handleDeleteMessage(message.id, message.senderId)}
-                >
-                  <Trash2 size={16} color="#EF4444" />
-                  <Text style={styles.deleteButtonText}>Delete</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          ))
+                <ArrowRight size={20} color="#9CA3AF" />
+              </TouchableOpacity>
+            ))}
+          </View>
         )}
       </ScrollView>
     </SafeAreaView>
@@ -222,7 +213,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#6B7280',
   },
-  messageCard: {
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: '#111827',
+    marginBottom: 12,
+  },
+  conversationCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     padding: 16,
@@ -232,129 +231,64 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+    gap: 12,
   },
-  messageHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  senderInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
-  },
-  senderAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#F3F4F6',
+  conversationIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#EEF2FF',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  senderDetails: {
-    marginLeft: 10,
+  conversationContent: {
     flex: 1,
   },
-  senderId: {
-    fontSize: 14,
+  conversationHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  conversationTitle: {
+    fontSize: 15,
     fontWeight: '600' as const,
     color: '#111827',
-    marginBottom: 2,
+    flex: 1,
   },
-  timestamp: {
+  conversationTime: {
     fontSize: 12,
     color: '#6B7280',
+    marginLeft: 8,
   },
-  typeBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  typeText: {
-    fontSize: 11,
-    fontWeight: '600' as const,
-    textTransform: 'capitalize',
-  },
-  messageBody: {
-    marginBottom: 12,
-  },
-  transactionInfo: {
+  conversationDetails: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
-  },
-  transactionLabel: {
-    fontSize: 12,
-    color: '#6B7280',
-    marginRight: 6,
-  },
-  transactionId: {
-    fontSize: 12,
-    fontWeight: '600' as const,
-    color: '#4F46E5',
-  },
-  contentContainer: {
-    backgroundColor: '#F9FAFB',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  contentLabel: {
-    fontSize: 11,
-    fontWeight: '600' as const,
-    color: '#6B7280',
+    gap: 8,
     marginBottom: 6,
   },
-  contentText: {
-    fontSize: 14,
-    color: '#111827',
-    lineHeight: 20,
-  },
-  imageInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-    backgroundColor: '#EFF6FF',
-    borderRadius: 6,
-  },
-  imageLabel: {
-    fontSize: 12,
-    color: '#3B82F6',
-    fontWeight: '500' as const,
-  },
-  messageActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  viewButton: {
+  conversationId: {
+    fontSize: 11,
+    color: '#6B7280',
     flex: 1,
-    backgroundColor: '#4F46E5',
-    paddingVertical: 10,
-    borderRadius: 8,
-    alignItems: 'center',
   },
-  viewButtonText: {
-    fontSize: 14,
+  messageCountBadge: {
+    backgroundColor: '#4F46E5',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  messageCountText: {
+    fontSize: 10,
     fontWeight: '600' as const,
     color: '#FFFFFF',
   },
-  deleteButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#EF4444',
-    gap: 6,
+  lastMessage: {
+    fontSize: 13,
+    color: '#6B7280',
+    lineHeight: 18,
   },
-  deleteButtonText: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: '#EF4444',
+  messageCard: {
+    display: 'none',
   },
 });

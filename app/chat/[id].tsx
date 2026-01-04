@@ -62,7 +62,7 @@ const MOCK_MESSAGES: Message[] = [
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { transactions, currentUser } = useApp();
+  const { transactions, currentUser, isAdmin } = useApp();
   const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES);
   const [inputText, setInputText] = useState('');
 
@@ -87,6 +87,10 @@ export default function ChatScreen() {
   const handleSend = async () => {
     if (!inputText.trim()) return;
 
+    const senderName = currentUser.firstName && currentUser.lastName 
+      ? `${currentUser.firstName} ${currentUser.lastName}`
+      : currentUser.name;
+
     const newMessage: Message = {
       id: `m${Date.now()}`,
       transactionId: id as string,
@@ -94,6 +98,8 @@ export default function ChatScreen() {
       content: inputText,
       type: 'text',
       timestamp: new Date().toISOString(),
+      isAdmin: isAdmin,
+      senderName: senderName,
     };
 
     setMessages(prev => [...prev, newMessage]);
@@ -156,12 +162,25 @@ export default function ChatScreen() {
                   isMe ? styles.messageContainerMe : styles.messageContainerOther,
                 ]}
               >
+                {message.isAdmin && (
+                  <View style={styles.adminBadgeContainer}>
+                    <View style={styles.adminBadge}>
+                      <Text style={styles.adminBadgeText}>ADMIN</Text>
+                    </View>
+                  </View>
+                )}
                 <View
                   style={[
                     styles.messageBubble,
                     isMe ? styles.messageBubbleMe : styles.messageBubbleOther,
+                    message.isAdmin && styles.messageBubbleAdmin,
                   ]}
                 >
+                  {message.isAdmin && (
+                    <Text style={styles.adminSenderName}>
+                      {message.senderName || 'Admin'}
+                    </Text>
+                  )}
                   <Text
                     style={[
                       styles.messageText,
@@ -351,5 +370,32 @@ const styles = StyleSheet.create({
   },
   sendButtonDisabled: {
     opacity: 0.5,
+  },
+  adminBadgeContainer: {
+    marginBottom: 4,
+  },
+  adminBadge: {
+    backgroundColor: '#EF4444',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+  },
+  adminBadgeText: {
+    fontSize: 10,
+    fontWeight: '700' as const,
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+  },
+  messageBubbleAdmin: {
+    backgroundColor: '#FEF2F2',
+    borderWidth: 1,
+    borderColor: '#FEE2E2',
+  },
+  adminSenderName: {
+    fontSize: 12,
+    fontWeight: '600' as const,
+    color: '#EF4444',
+    marginBottom: 4,
   },
 });
