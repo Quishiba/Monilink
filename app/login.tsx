@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 
@@ -20,6 +21,7 @@ export default function LoginScreen() {
     
     setLoading(true);
     try {
+      await AsyncStorage.setItem('user_email', emailOrPhone.trim());
       await login();
       if (router.canGoBack()) {
         router.back();

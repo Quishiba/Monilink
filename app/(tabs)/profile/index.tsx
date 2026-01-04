@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Shield, HelpCircle, LogOut, Globe, ChevronRight, Check, User, Lock, Star, FileText, ShieldCheck } from 'lucide-react-native';
+import { Shield, HelpCircle, LogOut, Globe, ChevronRight, Check, User, Lock, Star, FileText, ShieldCheck, Settings } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { Language } from '@/constants/translations';
@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
-  const { currentUser, kycData, language, t, changeLanguage } = useApp();
+  const { currentUser, kycData, language, t, changeLanguage, isAdmin } = useApp();
   const router = useRouter();
   const [showLanguageModal, setShowLanguageModal] = useState(false);
 
@@ -174,6 +174,25 @@ export default function ProfileScreen() {
               </View>
             </TouchableOpacity>
           </View>
+
+          {isAdmin && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Administration</Text>
+              <TouchableOpacity 
+                style={styles.card}
+                onPress={() => router.push('/admin-dashboard')}
+                activeOpacity={0.7}
+              >
+                <View style={styles.adminRow}>
+                  <View style={styles.adminLeft}>
+                    <Settings size={20} color={colors.dark.secondary} />
+                    <Text style={styles.adminText}>Dashboard Admin</Text>
+                  </View>
+                  <ChevronRight size={20} color={colors.dark.textSecondary} />
+                </View>
+              </TouchableOpacity>
+            </View>
+          )}
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t.profile.language}</Text>
@@ -498,6 +517,22 @@ const styles = StyleSheet.create({
   languageOptionText: {
     fontSize: 16,
     color: colors.dark.text,
+  },
+  adminRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  adminLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  adminText: {
+    fontSize: 15,
+    color: colors.dark.text,
+    fontWeight: '600' as const,
   },
   authModalOverlay: {
     flex: 1,
