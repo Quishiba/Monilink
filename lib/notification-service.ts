@@ -1,43 +1,61 @@
-import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+let Notifications: any = null;
+let isNotificationsAvailable = false;
 
-export async function registerForPushNotificationsAsync(): Promise<string | null> {
-  let token: string | null = null;
-
-  if (Platform.OS === 'android') {
-    await Notifications.setNotificationChannelAsync('default', {
-      name: 'default',
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: '#FF231F7C',
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  Notifications = require('expo-notifications');
+  isNotificationsAvailable = true;
+  
+  if (Notifications && Constants.appOwnership !== 'expo') {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
     });
   }
+} catch {
+  console.log('expo-notifications not available in Expo Go');
+  isNotificationsAvailable = false;
+}
 
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
-
-  if (existingStatus !== 'granted') {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
-
-  if (finalStatus !== 'granted') {
-    console.log('Failed to get push token for push notification!');
+export async function registerForPushNotificationsAsync(): Promise<string | null> {
+  if (!isNotificationsAvailable || !Notifications || Constants.appOwnership === 'expo') {
+    console.log('Push notifications not available in Expo Go');
     return null;
   }
 
+  let token: string | null = null;
+
   try {
+    if (Platform.OS === 'android') {
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+
+    if (finalStatus !== 'granted') {
+      console.log('Failed to get push token for push notification!');
+      return null;
+    }
+
     const projectId = Constants.expoConfig?.extra?.eas?.projectId ?? Constants.easConfig?.projectId;
     if (!projectId) {
       console.log('Project ID not found');
@@ -56,15 +74,24 @@ export async function scheduleLocalNotification(
   body: string,
   data?: Record<string, any>
 ) {
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title,
-      body,
-      data,
-      sound: true,
-    },
-    trigger: null,
-  });
+  if (!isNotificationsAvailable || !Notifications || Constants.appOwnership === 'expo') {
+    console.log('Local notification (Expo Go):', title, body);
+    return;
+  }
+
+  try {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        body,
+        data,
+        sound: true,
+      },
+      trigger: null,
+    });
+  } catch (error) {
+    console.log('Failed to schedule notification:', error);
+  }
 }
 
 export async function sendMessageNotification(senderName: string, message: string, transactionId: string) {
@@ -111,6 +138,16 @@ export async function sendKycVerificationNotification(status: string) {
   );
 }
 
-export function setupNotificationResponseHandler(callback: (response: Notifications.NotificationResponse) => void) {
-  return Notifications.addNotificationResponseReceivedListener(callback);
+export function setupNotificationResponseHandler(callback: (response: any) => void) {
+  if (!isNotificationsAvailable || !Notifications || Constants.appOwnership === 'expo') {
+    console.log('Notification response handler not available in Expo Go');
+    return { remove: () => {} };
+  }
+
+  try {
+    return Notifications.addNotificationResponseReceivedListener(callback);
+  } catch (error) {
+    console.log('Failed to setup notification handler:', error);
+    return { remove: () => {} };
+  }
 }
