@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Shield, HelpCircle, LogOut, Globe, ChevronRight, Check, User, Lock, Star, FileText, ShieldCheck } from 'lucide-react-native';
+import { Shield, HelpCircle, LogOut, Globe, ChevronRight, Check, User, Lock, Star, FileText, ShieldCheck, Settings } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { Language } from '@/constants/translations';
@@ -8,11 +8,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
-  const { currentUser, kycData, language, t, changeLanguage } = useApp();
+  const { currentUser, kycData, language, t, changeLanguage, isAdmin, toggleAdminMode } = useApp();
   const router = useRouter();
   const [showLanguageModal, setShowLanguageModal] = useState(false);
-
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [adminTapCount, setAdminTapCount] = useState(0);
 
   useEffect(() => {
     if (!currentUser) {
@@ -99,6 +99,20 @@ export default function ProfileScreen() {
     setShowLanguageModal(false);
   };
 
+  const handleAvatarPress = () => {
+    const newCount = adminTapCount + 1;
+    setAdminTapCount(newCount);
+    
+    if (newCount >= 7) {
+      toggleAdminMode();
+      setAdminTapCount(0);
+    }
+    
+    setTimeout(() => {
+      setAdminTapCount(0);
+    }, 3000);
+  };
+
   const menuItems = [
     { icon: User, label: t.profile.information, onPress: () => router.push('/profile-info') },
     { icon: Lock, label: t.profile.privacySecurity, onPress: () => router.push('/profile-security') },
@@ -106,6 +120,7 @@ export default function ProfileScreen() {
     { icon: Star, label: t.profile.evaluation, onPress: () => router.push('/profile-evaluation') },
     { icon: FileText, label: t.profile.termsOfService, onPress: () => router.push('/profile-terms') },
     { icon: ShieldCheck, label: t.profile.privacyPolicy, onPress: () => router.push('/profile-privacy') },
+    ...(isAdmin ? [{ icon: Settings, label: 'Admin Dashboard', onPress: () => router.push('/admin-dashboard'), color: '#8B5CF6' }] : []),
     { icon: LogOut, label: t.profile.logout, onPress: () => {}, color: '#EF4444' },
   ];
 
@@ -122,11 +137,22 @@ export default function ProfileScreen() {
           contentContainerStyle={styles.contentContainer}
         >
           <View style={styles.profileCard}>
-            <View style={styles.avatarLarge}>
-              <Text style={styles.avatarTextLarge}>{currentUser.name[0]}</Text>
-            </View>
+            <TouchableOpacity 
+              onPress={handleAvatarPress}
+              activeOpacity={0.8}
+            >
+              <View style={styles.avatarLarge}>
+                <Text style={styles.avatarTextLarge}>{currentUser.name[0]}</Text>
+              </View>
+            </TouchableOpacity>
             <Text style={styles.name}>{currentUser.name}</Text>
             <Text style={styles.location}>{currentUser.location}</Text>
+            {isAdmin && (
+              <View style={styles.adminBadge}>
+                <Settings size={14} color="#8B5CF6" />
+                <Text style={styles.adminText}>Admin Mode</Text>
+              </View>
+            )}
             
             {currentUser.kycStatus === 'verified' && (
               <View style={styles.verifiedBadge}>
@@ -353,6 +379,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600' as const,
     color: colors.dark.secondary,
+  },
+  adminBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#8B5CF615',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    marginTop: 8,
+    marginBottom: 12,
+  },
+  adminText: {
+    fontSize: 13,
+    fontWeight: '600' as const,
+    color: '#8B5CF6',
   },
   statsRow: {
     flexDirection: 'row',
