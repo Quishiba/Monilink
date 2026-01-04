@@ -8,9 +8,29 @@ const TWILIO_ACCOUNT_SID = process.env.EXPO_PUBLIC_TWILIO_ACCOUNT_SID;
 const TWILIO_AUTH_TOKEN = process.env.EXPO_PUBLIC_TWILIO_AUTH_TOKEN;
 const TWILIO_VERIFY_SERVICE_SID = process.env.EXPO_PUBLIC_TWILIO_VERIFY_SERVICE_SID;
 
+function base64Encode(str: string): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+  let output = '';
+  
+  for (let i = 0; i < str.length; i += 3) {
+    const a = str.charCodeAt(i);
+    const b = i + 1 < str.length ? str.charCodeAt(i + 1) : 0;
+    const c = i + 2 < str.length ? str.charCodeAt(i + 2) : 0;
+    
+    const bitmap = (a << 16) | (b << 8) | c;
+    
+    output += chars[(bitmap >> 18) & 63];
+    output += chars[(bitmap >> 12) & 63];
+    output += i + 1 < str.length ? chars[(bitmap >> 6) & 63] : '=';
+    output += i + 2 < str.length ? chars[bitmap & 63] : '=';
+  }
+  
+  return output;
+}
+
 function getAuthHeader(): string {
   const credentials = `${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`;
-  const base64Credentials = Buffer.from(credentials).toString('base64');
+  const base64Credentials = base64Encode(credentials);
   return `Basic ${base64Credentials}`;
 }
 
