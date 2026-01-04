@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Lock, Fingerprint, Smartphone, Trash2, ChevronRight } from 'lucide-react-native';
@@ -8,9 +8,16 @@ import { useState } from 'react';
 
 export default function ProfileSecurityScreen() {
   const router = useRouter();
-  const { t } = useApp();
+  const { t, deleteAccount } = useApp();
   const [biometricEnabled, setBiometricEnabled] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    await deleteAccount();
+    setShowDeleteModal(false);
+    router.replace('/login');
+  };
 
   return (
     <View style={styles.container}>
@@ -99,7 +106,7 @@ export default function ProfileSecurityScreen() {
             <View style={styles.card}>
               <TouchableOpacity
                 style={styles.menuItem}
-                onPress={() => {}}
+                onPress={() => setShowDeleteModal(true)}
                 activeOpacity={0.7}
               >
                 <View style={styles.menuLeft}>
@@ -118,6 +125,36 @@ export default function ProfileSecurityScreen() {
           </View>
         </ScrollView>
       </SafeAreaView>
+
+      <Modal
+        visible={showDeleteModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Supprimer mon compte</Text>
+            <Text style={styles.modalMessage}>
+              Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible et toutes vos données seront définitivement supprimées.
+            </Text>
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={handleDeleteAccount}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.deleteButtonText}>Confirmer la suppression</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setShowDeleteModal(false)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.cancelButtonText}>Annuler</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -200,5 +237,54 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 12,
     lineHeight: 18,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  modalContent: {
+    backgroundColor: colors.dark.surface,
+    borderRadius: 24,
+    padding: 24,
+    width: '100%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '700' as const,
+    color: colors.dark.text,
+    marginBottom: 12,
+  },
+  modalMessage: {
+    fontSize: 15,
+    color: colors.dark.textSecondary,
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  deleteButton: {
+    backgroundColor: colors.dark.error,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: colors.dark.text,
+  },
+  cancelButton: {
+    backgroundColor: colors.dark.surfaceLight,
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: '600' as const,
+    color: colors.dark.text,
   },
 });

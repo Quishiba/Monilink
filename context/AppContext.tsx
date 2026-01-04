@@ -134,6 +134,38 @@ export const [AppContext, useApp] = createContextHook(() => {
     }
   };
 
+  const deleteAccount = async () => {
+    try {
+      await AsyncStorage.multiRemove([
+        'is_authenticated',
+        'user_firstName',
+        'user_lastName',
+        'user_phone',
+        'user_email',
+        'app_language',
+      ]);
+      setIsAuthenticated(false);
+      setCurrentUser(null);
+      setKycData({
+        firstName: '',
+        lastName: '',
+        dateOfBirth: '',
+        phone: '',
+        phoneVerified: false,
+        address: '',
+        city: '',
+        postalCode: '',
+        country: '',
+        status: 'not_verified',
+        currentStep: 'personal_info',
+      });
+      setTransactions([]);
+      console.log('Account deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete account:', error);
+    }
+  };
+
   const addOffer = (offer: Offer) => {
     setOffers(prev => [offer, ...prev]);
   };
@@ -263,5 +295,6 @@ export const [AppContext, useApp] = createContextHook(() => {
     login,
     logout,
     register,
+    deleteAccount,
   };
 });
