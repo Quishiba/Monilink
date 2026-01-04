@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Platfo
 import { Stack, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
+import { sendVerificationCode, verifyCode } from '@/lib/sms-service';
 import { 
   ArrowLeft, 
   User, 
@@ -21,7 +22,7 @@ import * as ImagePicker from 'expo-image-picker';
 
 export default function KYCVerificationScreen() {
   const router = useRouter();
-  const { kycData, updateKycData, setKycStep, submitKyc, verifyPhone } = useApp();
+  const { t, kycData, updateKycData, setKycStep, submitKyc, verifyPhone } = useApp();
   const [otpCode, setOtpCode] = useState('');
   const [otpSent, setOtpSent] = useState(false);
 
@@ -99,21 +100,59 @@ export default function KYCVerificationScreen() {
     }
   };
 
-  const handleSendOTP = () => {
+  const handleSendOTP = async () => {
     console.log('Sending OTP to:', kycData.phone);
-    setOtpSent(true);
-    if (Platform.OS === 'web') {
-      Alert.alert('OTP Sent', `Verification code sent to ${kycData.phone}`, [{ text: 'OK' }]);
+    
+    if (!kycData.phone) {
+      Alert.alert(t.common.error, 'Please enter a phone number');
+      return;
+    }
+    
+    try {
+      const result = await sendVerificationCode(kycData.phone);
+      
+      if (result.success) {
+        console.log('✅ OTP sent successfully');
+        setOtpSent(true);
+        Alert.alert(t.common.success, `Verification code sent to ${kycData.phone}`);
+      } else {
+        console.error('❌ Failed to send OTP:', result.message);
+        Alert.alert(t.common.error, result.message || 'Failed to send verification code');
+      }
+    } catch (error) {
+      console.error('❌ Error sending OTP:', error);
+      Alert.alert(t.common.error, 'Failed to send verification code');
     }
   };
 
-  const handleVerifyOTP = () => {
-    if (otpCode.length === 6) {
-      console.log('Verifying OTP:', otpCode);
-      verifyPhone();
-      if (Platform.OS === 'web') {
-        Alert.alert('Success', 'Phone number verified successfully', [{ text: 'OK' }]);
+  const handleVerifyOTP = async () => {
+    if (otpCode.length !== 6) {
+      Alert.alert(t.common.error, 'Please enter a 6-digit code');
+      return;
+    }
+    
+    if (!kycData.phone) {
+      Alert.alert(t.common.error, 'Phone number is missing');
+      return;
+    }
+    
+    console.log('Verifying OTP:', otpCode);
+    
+    try {
+      const isValid = await verifyCode(kycData.phone, otpCode);
+      
+      if (isValid) {
+        console.log('✅ OTP verified successfully');
+        verifyPhone();
+        Alert.alert(t.common.success, 'Phone number verified successfully');
+      } else {
+        console.error('❌ Invalid OTP code');
+        Alert.alert(t.common.error, 'Invalid verification code. Please try again.');
+        setOtpCode('');
       }
+    } catch (error) {
+      console.error('❌ Error verifying OTP:', error);
+      Alert.alert(t.common.error, 'Failed to verify code');
     }
   };
 
