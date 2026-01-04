@@ -12,6 +12,7 @@ export const [AppContext, useApp] = createContextHook(() => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [kycData, setKycData] = useState<KYCData>({
     firstName: '',
     lastName: '',
@@ -33,9 +34,11 @@ export const [AppContext, useApp] = createContextHook(() => {
     const loadAuthState = async () => {
       try {
         const authState = await AsyncStorage.getItem('is_authenticated');
+        const adminState = await AsyncStorage.getItem('is_admin');
         if (authState === 'true') {
           setIsAuthenticated(true);
           setCurrentUser(getCurrentUser());
+          setIsAdmin(adminState === 'true');
         }
       } catch (error) {
         console.error('Failed to load auth state:', error);
@@ -127,8 +130,10 @@ export const [AppContext, useApp] = createContextHook(() => {
   const logout = async () => {
     try {
       await AsyncStorage.removeItem('is_authenticated');
+      await AsyncStorage.removeItem('is_admin');
       setIsAuthenticated(false);
       setCurrentUser(null);
+      setIsAdmin(false);
     } catch (error) {
       console.error('Failed to logout:', error);
     }
@@ -138,6 +143,7 @@ export const [AppContext, useApp] = createContextHook(() => {
     try {
       await AsyncStorage.multiRemove([
         'is_authenticated',
+        'is_admin',
         'user_firstName',
         'user_lastName',
         'user_phone',
@@ -146,6 +152,7 @@ export const [AppContext, useApp] = createContextHook(() => {
       ]);
       setIsAuthenticated(false);
       setCurrentUser(null);
+      setIsAdmin(false);
       setKycData({
         firstName: '',
         lastName: '',
@@ -273,6 +280,17 @@ export const [AppContext, useApp] = createContextHook(() => {
     }
   }, [verifyPhone]);
 
+  const toggleAdminMode = async () => {
+    try {
+      const newAdminState = !isAdmin;
+      await AsyncStorage.setItem('is_admin', newAdminState ? 'true' : 'false');
+      setIsAdmin(newAdminState);
+      console.log('Admin mode:', newAdminState ? 'enabled' : 'disabled');
+    } catch (error) {
+      console.error('Failed to toggle admin mode:', error);
+    }
+  };
+
   return {
     offers,
     transactions,
@@ -282,6 +300,8 @@ export const [AppContext, useApp] = createContextHook(() => {
     t,
     isAuthenticated,
     pushToken,
+    isAdmin,
+    toggleAdminMode,
     addOffer,
     createTransaction,
     updateTransactionStatus,

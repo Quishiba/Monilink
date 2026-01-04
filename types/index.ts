@@ -120,3 +120,42 @@ export interface Review {
   comment: string;
   createdAt: string;
 }
+
+export type AdminAction = 'suspend' | 'activate' | 'verify_kyc' | 'reject_kyc' | 'delete_message' | 'approve_transaction' | 'cancel_transaction';
+
+export interface AdminUser extends User {
+  email?: string;
+  phone?: string;
+  isAdmin: boolean;
+  isSuspended: boolean;
+  suspensionReason?: string;
+  suspendedAt?: string;
+  totalTransactions: number;
+  disputesCount: number;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  activeUsers: number;
+  suspendedUsers: number;
+  totalTransactions: number;
+  pendingTransactions: number;
+  completedTransactions: number;
+  disputedTransactions: number;
+  pendingKYC: number;
+  verifiedKYC: number;
+  rejectedKYC: number;
+  totalMessages: number;
+  flaggedMessages: number;
+}
+
+export interface AdminLog {
+  id: string;
+  adminId: string;
+  adminName: string;
+  action: AdminAction;
+  targetType: 'user' | 'transaction' | 'kyc' | 'message';
+  targetId: string;
+  details: string;
+  timestamp: string;
+}

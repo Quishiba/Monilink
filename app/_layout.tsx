@@ -16,6 +16,11 @@ function RootLayoutNav() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="admin-dashboard" />
+      <Stack.Screen name="admin-users" />
+      <Stack.Screen name="admin-transactions" />
+      <Stack.Screen name="admin-kyc" />
+      <Stack.Screen name="admin-messages" />
       <Stack.Screen name="login" />
       <Stack.Screen name="register" options={{ presentation: "modal" }} />
       <Stack.Screen name="reset-password" options={{ presentation: "modal" }} />
