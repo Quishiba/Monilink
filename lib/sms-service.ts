@@ -10,7 +10,8 @@ const TWILIO_VERIFY_SERVICE_SID = process.env.EXPO_PUBLIC_TWILIO_VERIFY_SERVICE_
 
 function getAuthHeader(): string {
   const credentials = `${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`;
-  return `Basic ${btoa(credentials)}`;
+  const base64Credentials = Buffer.from(credentials).toString('base64');
+  return `Basic ${base64Credentials}`;
 }
 
 export async function sendVerificationCode(phoneNumber: string): Promise<SMSVerificationResponse> {
