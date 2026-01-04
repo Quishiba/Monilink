@@ -26,128 +26,123 @@ export default function ProfilePrivacyScreen() {
           contentContainerStyle={styles.contentContainer}
         >
           <View style={styles.section}>
-            <Text style={styles.updateDate}>Dernière mise à jour: 1er janvier 2024</Text>
+            <Text style={styles.updateDate}>Dernière mise à jour: 4 janvier 2026</Text>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>1. Introduction</Text>
             <Text style={styles.paragraph}>
-              Chez MoniLink, nous prenons la protection de vos données personnelles très au sérieux. 
-              Cette politique de confidentialité explique comment nous collectons, utilisons et protégeons 
-              vos informations.
+              MoniLink attache une importance particulière à la protection des données personnelles de ses utilisateurs et s&apos;engage à les traiter de manière légale, loyale et transparente.
             </Text>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>2. Données collectées</Text>
             <Text style={styles.paragraph}>
-              Nous collectons les informations suivantes :
+              MoniLink peut collecter les données suivantes :
             </Text>
-            <Text style={styles.bulletPoint}>• Informations d&apos;identification (nom, prénom, date de naissance)</Text>
-            <Text style={styles.bulletPoint}>• Coordonnées (email, téléphone, adresse)</Text>
-            <Text style={styles.bulletPoint}>• Documents d&apos;identité (pour la vérification KYC)</Text>
-            <Text style={styles.bulletPoint}>• Historique des transactions</Text>
-            <Text style={styles.bulletPoint}>• Données de navigation et d&apos;utilisation</Text>
+            <Text style={[styles.paragraph, { marginTop: 12, fontWeight: '600' }]}>
+              a) Données d&apos;identification
+            </Text>
+            <Text style={styles.bulletPoint}>• nom, prénom,</Text>
+            <Text style={styles.bulletPoint}>• numéro de téléphone,</Text>
+            <Text style={styles.bulletPoint}>• adresse email,</Text>
+            <Text style={styles.bulletPoint}>• date de naissance.</Text>
+            <Text style={[styles.paragraph, { marginTop: 12, fontWeight: '600' }]}>
+              b) Données de vérification (KYC)
+            </Text>
+            <Text style={styles.bulletPoint}>• document d&apos;identité,</Text>
+            <Text style={styles.bulletPoint}>• selfie avec document,</Text>
+            <Text style={styles.bulletPoint}>• justificatif de domicile.</Text>
+            <Text style={[styles.paragraph, { marginTop: 12, fontWeight: '600' }]}>
+              c) Données d&apos;utilisation
+            </Text>
+            <Text style={styles.bulletPoint}>• historique des annonces et échanges,</Text>
+            <Text style={styles.bulletPoint}>• messages échangés via la plateforme,</Text>
+            <Text style={styles.bulletPoint}>• données techniques (logs, IP, appareil).</Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>3. Utilisation des données</Text>
+            <Text style={styles.sectionTitle}>3. Finalités du traitement</Text>
             <Text style={styles.paragraph}>
-              Vos données sont utilisées pour :
+              Les données sont collectées afin de :
             </Text>
-            <Text style={styles.bulletPoint}>• Vérifier votre identité (conformité KYC/AML)</Text>
-            <Text style={styles.bulletPoint}>• Faciliter les échanges entre utilisateurs</Text>
-            <Text style={styles.bulletPoint}>• Prévenir la fraude et garantir la sécurité</Text>
-            <Text style={styles.bulletPoint}>• Améliorer nos services</Text>
-            <Text style={styles.bulletPoint}>• Communiquer avec vous</Text>
+            <Text style={styles.bulletPoint}>• créer et gérer les comptes utilisateurs,</Text>
+            <Text style={styles.bulletPoint}>• assurer la mise en relation entre utilisateurs,</Text>
+            <Text style={styles.bulletPoint}>• renforcer la sécurité et prévenir la fraude,</Text>
+            <Text style={styles.bulletPoint}>• permettre l&apos;arbitrage en cas de litige,</Text>
+            <Text style={styles.bulletPoint}>• respecter les obligations légales.</Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>4. Vérification KYC</Text>
+            <Text style={styles.sectionTitle}>4. Partage des données</Text>
             <Text style={styles.paragraph}>
-              Dans le cadre de notre processus de vérification d&apos;identité, nous collectons et stockons :
+              Les données personnelles :
             </Text>
-            <Text style={styles.bulletPoint}>• Copies de documents d&apos;identité officiels</Text>
-            <Text style={styles.bulletPoint}>• Photos selfie avec document</Text>
-            <Text style={styles.bulletPoint}>• Preuves d&apos;adresse</Text>
+            <Text style={styles.bulletPoint}>• ne sont jamais vendues à des tiers,</Text>
+            <Text style={styles.bulletPoint}>• peuvent être partagées uniquement avec :</Text>
+            <Text style={[styles.bulletPoint, { marginLeft: 24 }]}>- des prestataires techniques (hébergement, KYC),</Text>
+            <Text style={[styles.bulletPoint, { marginLeft: 24 }]}>- des autorités compétentes si la loi l&apos;exige.</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>5. Conservation des données</Text>
+            <Text style={styles.paragraph}>
+              Les données sont conservées :
+            </Text>
+            <Text style={styles.bulletPoint}>• pendant la durée d&apos;utilisation du compte,</Text>
+            <Text style={styles.bulletPoint}>• puis archivées ou supprimées conformément aux obligations légales.</Text>
             <Text style={[styles.paragraph, { marginTop: 12 }]}>
-              Ces documents sont chiffrés et stockés de manière sécurisée. Seul le personnel autorisé 
-              peut y accéder dans le cadre de la vérification.
+              Les documents KYC sont conservés de manière sécurisée et pour une durée limitée.
             </Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>5. Partage des données</Text>
-            <Text style={styles.paragraph}>
-              Nous ne vendons jamais vos données personnelles. Nous pouvons partager vos informations avec :
-            </Text>
-            <Text style={styles.bulletPoint}>• Les autres utilisateurs (informations de profil public)</Text>
-            <Text style={styles.bulletPoint}>• Les prestataires de services (hébergement, paiement)</Text>
-            <Text style={styles.bulletPoint}>• Les autorités légales (sur demande officielle)</Text>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>6. Sécurité des données</Text>
             <Text style={styles.paragraph}>
-              Nous mettons en œuvre des mesures de sécurité techniques et organisationnelles pour protéger 
-              vos données :
+              MoniLink met en œuvre des mesures techniques et organisationnelles adaptées :
             </Text>
-            <Text style={styles.bulletPoint}>• Chiffrement des données sensibles</Text>
-            <Text style={styles.bulletPoint}>• Accès restreint aux données personnelles</Text>
-            <Text style={styles.bulletPoint}>• Surveillance et audits réguliers</Text>
-            <Text style={styles.bulletPoint}>• Formation du personnel à la protection des données</Text>
+            <Text style={styles.bulletPoint}>• chiffrement,</Text>
+            <Text style={styles.bulletPoint}>• accès restreint,</Text>
+            <Text style={styles.bulletPoint}>• journalisation des accès,</Text>
+            <Text style={styles.bulletPoint}>• audits de sécurité.</Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>7. Durée de conservation</Text>
+            <Text style={styles.sectionTitle}>7. Droits des utilisateurs</Text>
             <Text style={styles.paragraph}>
-              Nous conservons vos données personnelles aussi longtemps que nécessaire pour :
+              Conformément à la réglementation applicable (RGPD), chaque utilisateur dispose :
             </Text>
-            <Text style={styles.bulletPoint}>• Fournir nos services</Text>
-            <Text style={styles.bulletPoint}>• Respecter nos obligations légales (5 ans minimum pour KYC)</Text>
-            <Text style={styles.bulletPoint}>• Résoudre les litiges</Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>8. Vos droits (RGPD)</Text>
-            <Text style={styles.paragraph}>
-              Conformément au RGPD, vous disposez des droits suivants :
-            </Text>
-            <Text style={styles.bulletPoint}>• Droit d&apos;accès à vos données</Text>
-            <Text style={styles.bulletPoint}>• Droit de rectification</Text>
-            <Text style={styles.bulletPoint}>• Droit à l&apos;effacement (&quot;droit à l&apos;oubli&quot;)</Text>
-            <Text style={styles.bulletPoint}>• Droit à la limitation du traitement</Text>
-            <Text style={styles.bulletPoint}>• Droit à la portabilité</Text>
-            <Text style={styles.bulletPoint}>• Droit d&apos;opposition</Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>9. Cookies et technologies similaires</Text>
-            <Text style={styles.paragraph}>
-              Nous utilisons des cookies pour améliorer votre expérience, analyser l&apos;utilisation de 
-              l&apos;application et personnaliser le contenu. Vous pouvez gérer vos préférences en matière 
-              de cookies dans les paramètres.
-            </Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>10. Modifications de la politique</Text>
-            <Text style={styles.paragraph}>
-              Nous pouvons modifier cette politique de confidentialité à tout moment. Les modifications 
-              significatives vous seront notifiées par email ou via l&apos;application.
-            </Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>11. Contact</Text>
-            <Text style={styles.paragraph}>
-              Pour toute question concernant vos données personnelles ou pour exercer vos droits :
-            </Text>
-            <Text style={styles.contactText}>privacy@monilink.app</Text>
+            <Text style={styles.bulletPoint}>• d&apos;un droit d&apos;accès,</Text>
+            <Text style={styles.bulletPoint}>• de rectification,</Text>
+            <Text style={styles.bulletPoint}>• de suppression,</Text>
+            <Text style={styles.bulletPoint}>• de limitation,</Text>
+            <Text style={styles.bulletPoint}>• et d&apos;opposition au traitement de ses données.</Text>
             <Text style={[styles.paragraph, { marginTop: 12 }]}>
-              Délégué à la Protection des Données :
+              Toute demande peut être adressée au support MoniLink.
             </Text>
-            <Text style={styles.contactText}>dpo@monilink.app</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>8. Responsabilité limitée</Text>
+            <Text style={styles.paragraph}>
+              MoniLink ne saurait être tenue responsable des données échangées volontairement entre utilisateurs en dehors des fonctionnalités sécurisées de la plateforme.
+            </Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>9. Modifications</Text>
+            <Text style={styles.paragraph}>
+              La présente politique de confidentialité peut être mise à jour à tout moment. Les utilisateurs seront informés de toute modification significative.
+            </Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>10. Contact</Text>
+            <Text style={styles.paragraph}>
+              Pour toute question relative aux données personnelles :
+            </Text>
+            <Text style={styles.contactText}>info.quishiba@gmail.com</Text>
           </View>
         </ScrollView>
       </SafeAreaView>

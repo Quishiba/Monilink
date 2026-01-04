@@ -26,94 +26,121 @@ export default function ProfileTermsScreen() {
           contentContainerStyle={styles.contentContainer}
         >
           <View style={styles.section}>
-            <Text style={styles.updateDate}>Dernière mise à jour: 1er janvier 2024</Text>
+            <Text style={styles.updateDate}>Dernière mise à jour: 4 janvier 2026</Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>1. Acceptation des conditions</Text>
+            <Text style={styles.sectionTitle}>1. Objet de la plateforme</Text>
             <Text style={styles.paragraph}>
-              En utilisant MoniLink, vous acceptez d&apos;être lié par ces Conditions Générales d&apos;Utilisation. 
-              Si vous n&apos;acceptez pas ces conditions, veuillez ne pas utiliser notre service.
+              MoniLink est une plateforme numérique dont l&apos;objet est de mettre en relation des utilisateurs souhaitant échanger des devises entre eux.
+            </Text>
+            <Text style={[styles.paragraph, { marginTop: 12 }]}>
+              MoniLink n&apos;est ni une banque, ni un établissement de paiement, ni un prestataire de services financiers. La plateforme n&apos;intervient pas directement dans les transferts d&apos;argent entre les utilisateurs.
+            </Text>
+            <Text style={[styles.paragraph, { marginTop: 12 }]}>
+              MoniLink agit exclusivement comme :
+            </Text>
+            <Text style={styles.bulletPoint}>• une plateforme de mise en relation,</Text>
+            <Text style={styles.bulletPoint}>• un outil de communication sécurisé,</Text>
+            <Text style={styles.bulletPoint}>• et un intermédiaire d&apos;arbitrage en cas de litige, lorsque cela est possible.</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>2. Accès au service</Text>
+            <Text style={styles.paragraph}>
+              L&apos;accès à certaines fonctionnalités de MoniLink nécessite :
+            </Text>
+            <Text style={styles.bulletPoint}>• la création d&apos;un compte utilisateur,</Text>
+            <Text style={styles.bulletPoint}>• la fourniture d&apos;informations exactes et à jour,</Text>
+            <Text style={styles.bulletPoint}>• et, pour certaines actions, la vérification de l&apos;identité (KYC).</Text>
+            <Text style={[styles.paragraph, { marginTop: 12 }]}>
+              MoniLink se réserve le droit de restreindre ou suspendre l&apos;accès à un utilisateur en cas de non-respect des présentes CGU.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>2. Description du service</Text>
+            <Text style={styles.sectionTitle}>3. Rôle et responsabilités de MoniLink</Text>
             <Text style={styles.paragraph}>
-              MoniLink est une plateforme de mise en relation permettant aux utilisateurs d&apos;échanger 
-              des devises entre particuliers. Nous ne sommes pas une institution financière et n&apos;effectuons 
-              aucune transaction directement.
+              MoniLink :
+            </Text>
+            <Text style={styles.bulletPoint}>• ne détient jamais les fonds des utilisateurs,</Text>
+            <Text style={styles.bulletPoint}>• ne garantit pas l&apos;exécution effective d&apos;un échange,</Text>
+            <Text style={styles.bulletPoint}>• ne fixe pas les taux de change proposés par les utilisateurs,</Text>
+            <Text style={styles.bulletPoint}>• n&apos;est pas partie au contrat d&apos;échange conclu entre utilisateurs.</Text>
+            <Text style={[styles.paragraph, { marginTop: 12 }]}>
+              Les échanges sont réalisés sous la seule responsabilité des utilisateurs concernés.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>3. Vérification d&apos;identité (KYC)</Text>
+            <Text style={styles.sectionTitle}>4. Responsabilités des utilisateurs</Text>
             <Text style={styles.paragraph}>
-              Pour des raisons de sécurité et de conformité réglementaire, nous exigeons que tous les 
-              utilisateurs souhaitant effectuer des transactions vérifient leur identité. Cette vérification 
-              comprend la fourniture de documents d&apos;identité officiels et d&apos;une preuve d&apos;adresse.
+              Chaque utilisateur s&apos;engage à :
+            </Text>
+            <Text style={styles.bulletPoint}>• fournir des informations exactes,</Text>
+            <Text style={styles.bulletPoint}>• respecter les lois applicables (notamment en matière de change, fiscalité et lutte contre la fraude),</Text>
+            <Text style={styles.bulletPoint}>• n&apos;utiliser la plateforme qu&apos;à des fins licites,</Text>
+            <Text style={styles.bulletPoint}>• honorer ses engagements lors d&apos;un échange accepté.</Text>
+            <Text style={[styles.paragraph, { marginTop: 12 }]}>
+              Toute tentative de fraude, de manipulation ou d&apos;abus pourra entraîner la suspension ou la suppression du compte.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>4. Utilisation du service</Text>
+            <Text style={styles.sectionTitle}>5. Vérification d&apos;identité (KYC)</Text>
             <Text style={styles.paragraph}>
-              Vous vous engagez à :
+              Afin de renforcer la sécurité et la confiance entre utilisateurs, MoniLink peut exiger une vérification d&apos;identité avant l&apos;accès à certaines fonctionnalités, notamment l&apos;acceptation ou la finalisation d&apos;un échange.
             </Text>
-            <Text style={styles.bulletPoint}>• Fournir des informations exactes et à jour</Text>
-            <Text style={styles.bulletPoint}>• Ne pas utiliser le service à des fins illégales</Text>
-            <Text style={styles.bulletPoint}>• Respecter les autres utilisateurs</Text>
-            <Text style={styles.bulletPoint}>• Ne pas créer de faux comptes</Text>
-            <Text style={styles.bulletPoint}>• Honorer vos engagements d&apos;échange</Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>5. Transactions</Text>
-            <Text style={styles.paragraph}>
-              Les transactions sont effectuées directement entre utilisateurs. MoniLink agit uniquement 
-              comme intermédiaire de mise en relation. Nous ne sommes pas responsables des litiges entre 
-              utilisateurs, mais nous proposons un système de médiation.
+            <Text style={[styles.paragraph, { marginTop: 12 }]}>
+              La vérification d&apos;identité ne constitue en aucun cas une garantie financière sur les échanges effectués.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>6. Frais</Text>
+            <Text style={styles.sectionTitle}>6. Litiges et arbitrage</Text>
             <Text style={styles.paragraph}>
-              MoniLink peut facturer des frais de service pour certaines fonctionnalités. Ces frais seront 
-              clairement indiqués avant toute transaction.
+              En cas de litige entre utilisateurs, MoniLink peut :
+            </Text>
+            <Text style={styles.bulletPoint}>• analyser les éléments fournis (preuves, messages, historique),</Text>
+            <Text style={styles.bulletPoint}>• proposer une solution d&apos;arbitrage non contraignante.</Text>
+            <Text style={[styles.paragraph, { marginTop: 12 }]}>
+              La décision finale concernant un échange reste toutefois sous la responsabilité des utilisateurs, sauf disposition contraire imposée par la loi.
             </Text>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>7. Suspension et résiliation</Text>
             <Text style={styles.paragraph}>
-              Nous nous réservons le droit de suspendre ou de résilier votre compte en cas de violation 
-              de ces conditions, d&apos;activité suspecte ou pour toute autre raison jugée nécessaire.
+              MoniLink se réserve le droit de :
+            </Text>
+            <Text style={styles.bulletPoint}>• suspendre temporairement un compte,</Text>
+            <Text style={styles.bulletPoint}>• résilier définitivement un compte,</Text>
+            <Text style={[styles.paragraph, { marginTop: 12 }]}>
+              en cas de violation des CGU, de comportement frauduleux ou de risque pour la communauté.
             </Text>
           </View>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>8. Limitation de responsabilité</Text>
             <Text style={styles.paragraph}>
-              MoniLink n&apos;est pas responsable des pertes financières, des retards, des fraudes ou de tout 
-              autre dommage résultant de l&apos;utilisation du service ou des transactions entre utilisateurs.
+              Dans les limites autorisées par la loi :
+            </Text>
+            <Text style={styles.bulletPoint}>• MoniLink ne saurait être tenue responsable des pertes financières résultant d&apos;un échange entre utilisateurs,</Text>
+            <Text style={styles.bulletPoint}>• ni des retards, erreurs ou inexécutions imputables aux utilisateurs ou à des tiers.</Text>
+          </View>
+
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>9. Modification des CGU</Text>
+            <Text style={styles.paragraph}>
+              MoniLink peut modifier les présentes CGU à tout moment. Les utilisateurs seront informés de toute modification substantielle.
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>9. Modifications des conditions</Text>
+            <Text style={styles.sectionTitle}>10. Droit applicable</Text>
             <Text style={styles.paragraph}>
-              Nous nous réservons le droit de modifier ces conditions à tout moment. Les modifications 
-              seront effectives dès leur publication sur l&apos;application.
+              Les présentes CGU sont régies par le droit applicable dans le pays d&apos;établissement de MoniLink, sous réserve des règles impératives du pays de résidence de l&apos;utilisateur.
             </Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>10. Contact</Text>
-            <Text style={styles.paragraph}>
-              Pour toute question concernant ces conditions, veuillez nous contacter à :
-            </Text>
-            <Text style={styles.contactText}>legal@monilink.app</Text>
           </View>
         </ScrollView>
       </SafeAreaView>
