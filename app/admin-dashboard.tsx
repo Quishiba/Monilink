@@ -129,28 +129,40 @@ function AdminDashboardContent() {
           <Text style={styles.sectionTitle}>Management</Text>
           
           <View style={styles.managementGrid}>
-            <TouchableOpacity style={styles.managementCard}>
+            <TouchableOpacity 
+              style={styles.managementCard}
+              onPress={() => router.push('/admin-kyc')}
+            >
               <Shield size={32} color="#4F46E5" />
               <Text style={styles.managementTitle}>KYC Review</Text>
               <Text style={styles.managementValue}>{stats?.pendingKYC || 0}</Text>
               <Text style={styles.managementLabel}>Pending</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.managementCard}>
+            <TouchableOpacity 
+              style={styles.managementCard}
+              onPress={() => router.push('/admin-transactions')}
+            >
               <FileText size={32} color="#10B981" />
               <Text style={styles.managementTitle}>Transactions</Text>
               <Text style={styles.managementValue}>{stats?.pendingTransactions || 0}</Text>
               <Text style={styles.managementLabel}>Pending</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.managementCard}>
+            <TouchableOpacity 
+              style={styles.managementCard}
+              onPress={() => router.push('/admin-messages')}
+            >
               <MessageSquare size={32} color="#8B5CF6" />
               <Text style={styles.managementTitle}>Messages</Text>
               <Text style={styles.managementValue}>{stats?.flaggedMessages || 0}</Text>
               <Text style={styles.managementLabel}>Flagged</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.managementCard}>
+            <TouchableOpacity 
+              style={styles.managementCard}
+              onPress={() => router.push('/admin-users')}
+            >
               <Users size={32} color="#F59E0B" />
               <Text style={styles.managementTitle}>Users</Text>
               <Text style={styles.managementValue}>{stats?.totalUsers || 0}</Text>
