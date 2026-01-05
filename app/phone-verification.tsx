@@ -83,6 +83,11 @@ export default function PhoneVerificationScreen() {
       return;
     }
 
+    if (verificationCode.length !== 6) {
+      console.error('❌ Code must be 6 digits, received:', verificationCode.length);
+      return;
+    }
+
     setLoading(true);
     try {
       console.log('Verifying phone with code:', verificationCode);
@@ -91,6 +96,7 @@ export default function PhoneVerificationScreen() {
       const isValid = await verifyCode(phoneNumber, verificationCode);
       
       if (isValid) {
+        console.log('✅ Verification successful, updating app state');
         verifyPhone();
         
         Alert.alert(
@@ -110,13 +116,19 @@ export default function PhoneVerificationScreen() {
           ]
         );
       } else {
-        Alert.alert(t.common.error, 'Invalid verification code. Please try again.');
+        console.error('❌ Verification failed');
+        Alert.alert(
+          t.common.error, 
+          'Invalid code. Please check:\n\n1. Code entered correctly\n2. SMS received on phone\n3. Code not expired (10 min)\n\nTry resending the code.'
+        );
         setCode(['', '', '', '', '', '']);
         inputRefs.current[0]?.focus();
       }
     } catch (error) {
-      console.error('Verification error:', error);
-      Alert.alert(t.common.error, 'Invalid verification code');
+      console.error('❌ Verification exception:', error);
+      Alert.alert(t.common.error, 'Verification failed. Please try again.');
+      setCode(['', '', '', '', '', '']);
+      inputRefs.current[0]?.focus();
     } finally {
       setLoading(false);
     }

@@ -107,9 +107,15 @@ export async function verifyCode(phoneNumber: string, code: string): Promise<boo
     console.log('=== TWILIO VERIFY - CHECKING CODE ===');
     console.log('Phone Number:', phoneNumber);
     console.log('Code:', code);
+    console.log('Code length:', code.length);
     
     if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_VERIFY_SERVICE_SID) {
       console.error('❌ Twilio credentials not configured');
+      return false;
+    }
+
+    if (!code || code.length !== 6) {
+      console.error('❌ Invalid code format. Must be 6 digits. Received:', code);
       return false;
     }
 
@@ -138,7 +144,19 @@ export async function verifyCode(phoneNumber: string, code: string): Promise<boo
     }
     
     console.error('❌ VERIFICATION FAILED');
-    console.error('Response:', JSON.stringify(data, null, 2));
+    console.error('Status:', data.status);
+    console.error('Valid:', data.valid);
+    
+    if (data.status === 'pending') {
+      console.error('⚠️  Code is incorrect or verification not found');
+      console.error('Possible reasons:');
+      console.error('1. Wrong code entered');
+      console.error('2. SMS not delivered yet (check phone)');
+      console.error('3. Verification expired (codes expire after 10 minutes)');
+      console.error('4. Too many attempts');
+    }
+    
+    console.error('Full Response:', JSON.stringify(data, null, 2));
     return false;
   } catch (error) {
     console.error('❌ Failed to verify code:', error);
