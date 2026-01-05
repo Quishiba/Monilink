@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ArrowLeft, Shield, MessageCircle, CheckCircle, Clock, AlertCircle } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
-import { getCurrencyInfo } from '@/constants/currencies';
 import { useState, useEffect } from 'react';
 import { TransactionStatus } from '@/types';
 
@@ -72,8 +71,6 @@ export default function TransactionScreen() {
     updatedAt: offer!.createdAt,
   };
 
-  const giveInfo = getCurrencyInfo(displayData.giveCurrency);
-  const getInfo = getCurrencyInfo(displayData.getCurrency);
   const statusConfig = STATUS_CONFIG[displayData.status];
   const StatusIcon = statusConfig.icon;
 
@@ -179,48 +176,6 @@ export default function TransactionScreen() {
             <Text style={[styles.statusText, { color: statusConfig.color }]}>
               {statusConfig.label}
             </Text>
-          </View>
-
-          <View style={styles.exchangeCard}>
-            <Text style={styles.cardTitle}>Exchange Details</Text>
-            
-            <View style={styles.exchangeRow}>
-              <View style={styles.currencyInfo}>
-                <Text style={styles.currencyFlag}>{giveInfo.flag}</Text>
-                <View>
-                  <Text style={styles.currencyLabel}>Sending</Text>
-                  <Text style={styles.currencyAmount}>
-                    {displayData.giveAmount.toLocaleString()} {displayData.giveCurrency}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.arrowDivider}>
-                <View style={styles.arrow} />
-              </View>
-
-              <View style={styles.currencyInfo}>
-                <Text style={styles.currencyFlag}>{getInfo.flag}</Text>
-                <View>
-                  <Text style={styles.currencyLabel}>Receiving</Text>
-                  <Text style={styles.currencyAmount}>
-                    {displayData.getAmount.toLocaleString()} {displayData.getCurrency}
-                  </Text>
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.rateInfo}>
-              <Text style={styles.rateLabel}>Rate</Text>
-              <Text style={styles.rateValue}>1 {displayData.giveCurrency} = {displayData.rate.toFixed(4)} {displayData.getCurrency}</Text>
-            </View>
-
-            <View style={styles.methodInfo}>
-              <Text style={styles.methodLabel}>Payment Method</Text>
-              <View style={styles.methodBadge}>
-                <Text style={styles.methodText}>{displayData.paymentMethod}</Text>
-              </View>
-            </View>
           </View>
 
           <View style={styles.partiesCard}>

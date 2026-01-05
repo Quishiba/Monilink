@@ -1,18 +1,31 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Shield, HelpCircle, LogOut, Globe, ChevronRight, Check, User, Lock, Star, FileText, ShieldCheck, Settings } from 'lucide-react-native';
+import { Shield, HelpCircle, LogOut, Globe, ChevronRight, Check, User, Lock, Star, FileText, ShieldCheck, Settings, X, Edit2 } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { Language } from '@/constants/translations';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
+import { PaymentMethod, Currency } from '@/types';
+import { getCurrencyInfo } from '@/constants/currencies';
 
 export default function ProfileScreen() {
   const { currentUser, kycData, language, t, changeLanguage, isAdmin } = useApp();
   const router = useRouter();
   const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false);
+  const [showCurrencyModal, setShowCurrencyModal] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [preferredCurrencies, setPreferredCurrencies] = useState<Currency[]>([]);
 
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  useEffect(() => {
+    if (currentUser) {
+      setPaymentMethods(currentUser.paymentMethods);
+      setPreferredCurrencies(currentUser.preferredCurrencies);
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     if (!currentUser) {
@@ -97,6 +110,29 @@ export default function ProfileScreen() {
   const handleLanguageChange = async (lang: Language) => {
     await changeLanguage(lang);
     setShowLanguageModal(false);
+  };
+
+  const availablePaymentMethods: PaymentMethod[] = ['SEPA', 'Mobile Money', 'Cash Pickup', 'Bank Transfer', 'Wise'];
+  const availableCurrencies: Currency[] = ['EUR', 'USD', 'GBP', 'XAF', 'XOF'];
+
+  const handleAddPaymentMethod = (method: PaymentMethod) => {
+    if (!paymentMethods.includes(method)) {
+      setPaymentMethods([...paymentMethods, method]);
+      Alert.alert(t.common.success, `${method} added successfully`);
+    }
+  };
+
+  const handleRemovePaymentMethod = (method: PaymentMethod) => {
+    setPaymentMethods(paymentMethods.filter(m => m !== method));
+    Alert.alert(t.common.success, `${method} removed successfully`);
+  };
+
+  const handleToggleCurrency = (currency: Currency) => {
+    if (preferredCurrencies.includes(currency)) {
+      setPreferredCurrencies(preferredCurrencies.filter(c => c !== currency));
+    } else {
+      setPreferredCurrencies([...preferredCurrencies, currency]);
+    }
   };
 
   const menuItems = [
@@ -214,29 +250,71 @@ export default function ProfileScreen() {
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t.profile.paymentMethods}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t.profile.paymentMethods}</Text>
+              <TouchableOpacity
+                onPress={() => setShowPaymentMethodModal(true)}
+                style={styles.addButton}
+                activeOpacity={0.7}
+              >
+                <Edit2 size={18} color={colors.dark.secondary} />
+              </TouchableOpacity>
+            </View>
             <View style={styles.card}>
-              {currentUser.paymentMethods.map((method: string, index: number) => (
-                <View key={method}>
-                  <View style={styles.methodRow}>
-                    <Text style={styles.methodText}>{method}</Text>
+              {paymentMethods.length === 0 ? (
+                <Text style={styles.emptyText}>No payment methods added</Text>
+              ) : (
+                paymentMethods.map((method: PaymentMethod, index: number) => (
+                  <View key={method}>
+                    <View style={styles.methodRow}>
+                      <Text style={styles.methodText}>{method}</Text>
+                      <TouchableOpacity
+                        onPress={() => handleRemovePaymentMethod(method)}
+                        activeOpacity={0.7}
+                      >
+                        <X size={18} color={colors.dark.error} />
+                      </TouchableOpacity>
+                    </View>
+                    {index < paymentMethods.length - 1 && <View style={styles.divider} />}
                   </View>
-                  {index < currentUser.paymentMethods.length - 1 && <View style={styles.divider} />}
-                </View>
-              ))}
+                ))
+              )}
             </View>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>{t.profile.preferredCurrencies}</Text>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>{t.profile.preferredCurrencies}</Text>
+              <TouchableOpacity
+                onPress={() => setShowCurrencyModal(true)}
+                style={styles.addButton}
+                activeOpacity={0.7}
+              >
+                <Edit2 size={18} color={colors.dark.secondary} />
+              </TouchableOpacity>
+            </View>
             <View style={styles.card}>
-              <View style={styles.currencyRow}>
-                {currentUser.preferredCurrencies.map((currency: string) => (
-                  <View key={currency} style={styles.currencyTag}>
-                    <Text style={styles.currencyText}>{currency}</Text>
-                  </View>
-                ))}
-              </View>
+              {preferredCurrencies.length === 0 ? (
+                <Text style={styles.emptyText}>No currencies selected</Text>
+              ) : (
+                <View style={styles.currencyRow}>
+                  {preferredCurrencies.map((currency: Currency) => {
+                    const currencyInfo = getCurrencyInfo(currency);
+                    return (
+                      <View key={currency} style={styles.currencyTag}>
+                        <Text style={styles.currencyFlag}>{currencyInfo.flag}</Text>
+                        <Text style={styles.currencyText}>{currency}</Text>
+                        <TouchableOpacity
+                          onPress={() => handleToggleCurrency(currency)}
+                          activeOpacity={0.7}
+                        >
+                          <X size={14} color={colors.dark.textSecondary} />
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
             </View>
           </View>
 
@@ -296,6 +374,77 @@ export default function ProfileScreen() {
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
+      </Modal>
+
+      <Modal
+        visible={showPaymentMethodModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowPaymentMethodModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.bottomModalContent}>
+            <View style={styles.bottomModalHeader}>
+              <Text style={styles.modalTitle}>{t.profile.paymentMethods}</Text>
+              <TouchableOpacity onPress={() => setShowPaymentMethodModal(false)}>
+                <X size={24} color={colors.dark.text} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.methodsList}>
+              {availablePaymentMethods.map((method) => (
+                <TouchableOpacity
+                  key={method}
+                  style={styles.methodOption}
+                  onPress={() => handleAddPaymentMethod(method)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.methodOptionText}>{method}</Text>
+                  {paymentMethods.includes(method) && <Check size={20} color={colors.dark.secondary} />}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showCurrencyModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowCurrencyModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.bottomModalContent}>
+            <View style={styles.bottomModalHeader}>
+              <Text style={styles.modalTitle}>{t.profile.preferredCurrencies}</Text>
+              <TouchableOpacity onPress={() => setShowCurrencyModal(false)}>
+                <X size={24} color={colors.dark.text} />
+              </TouchableOpacity>
+            </View>
+            <ScrollView style={styles.currenciesList}>
+              {availableCurrencies.map((currency) => {
+                const currencyInfo = getCurrencyInfo(currency);
+                return (
+                  <TouchableOpacity
+                    key={currency}
+                    style={styles.currencyOption}
+                    onPress={() => handleToggleCurrency(currency)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.currencyOptionLeft}>
+                      <Text style={styles.currencyOptionFlag}>{currencyInfo.flag}</Text>
+                      <View>
+                        <Text style={styles.currencyOptionText}>{currency}</Text>
+                        <Text style={styles.currencyOptionSubtext}>{currencyInfo.name}</Text>
+                      </View>
+                    </View>
+                    {preferredCurrencies.includes(currency) && <Check size={20} color={colors.dark.secondary} />}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
       </Modal>
     </View>
   );
@@ -400,12 +549,25 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: 20,
   },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '700' as const,
     color: colors.dark.text,
-    paddingHorizontal: 20,
-    marginBottom: 12,
+  },
+  addButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.dark.surfaceLight,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   card: {
     backgroundColor: colors.dark.surface,
@@ -414,11 +576,20 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   methodRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingVertical: 8,
   },
   methodText: {
     fontSize: 15,
     color: colors.dark.text,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: colors.dark.textSecondary,
+    textAlign: 'center',
+    paddingVertical: 8,
   },
   divider: {
     height: 1,
@@ -431,10 +602,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   currencyTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     backgroundColor: colors.dark.surfaceLight,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
+  },
+  currencyFlag: {
+    fontSize: 16,
   },
   currencyText: {
     fontSize: 14,
@@ -584,5 +761,64 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600' as const,
     color: colors.dark.text,
+  },
+  bottomModalContent: {
+    backgroundColor: colors.dark.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 20,
+    paddingBottom: 40,
+    maxHeight: '70%',
+  },
+  bottomModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  methodsList: {
+    paddingHorizontal: 20,
+  },
+  methodOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.dark.border,
+  },
+  methodOptionText: {
+    fontSize: 16,
+    color: colors.dark.text,
+  },
+  currenciesList: {
+    paddingHorizontal: 20,
+  },
+  currencyOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.dark.border,
+  },
+  currencyOptionLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  currencyOptionFlag: {
+    fontSize: 24,
+  },
+  currencyOptionText: {
+    fontSize: 16,
+    color: colors.dark.text,
+    fontWeight: '600' as const,
+  },
+  currencyOptionSubtext: {
+    fontSize: 13,
+    color: colors.dark.textSecondary,
+    marginTop: 2,
   },
 });
