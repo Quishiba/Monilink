@@ -4,12 +4,12 @@ import Constants from 'expo-constants';
 let Notifications: any = null;
 let isNotificationsAvailable = false;
 
-try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  Notifications = require('expo-notifications');
-  isNotificationsAvailable = true;
-  
-  if (Notifications && Constants.appOwnership !== 'expo') {
+if (Constants.appOwnership !== 'expo') {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    Notifications = require('expo-notifications');
+    isNotificationsAvailable = true;
+    
     Notifications.setNotificationHandler({
       handleNotification: async () => ({
         shouldShowAlert: true,
@@ -19,10 +19,12 @@ try {
         shouldShowList: true,
       }),
     });
+  } catch (error) {
+    console.log('expo-notifications not available:', error);
+    isNotificationsAvailable = false;
   }
-} catch {
-  console.log('expo-notifications not available in Expo Go');
-  isNotificationsAvailable = false;
+} else {
+  console.log('Push notifications not available in Expo Go (SDK 53+)');
 }
 
 export async function registerForPushNotificationsAsync(): Promise<string | null> {
