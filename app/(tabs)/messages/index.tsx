@@ -1,13 +1,15 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MoreVertical, EyeOff, Flag, Ban } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function MessagesScreen() {
   const router = useRouter();
-  const { offers, isAuthenticated, t } = useApp();
+  const { offers, isAuthenticated, t, hideConversation, reportConversation, blockUser } = useApp();
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -75,29 +77,86 @@ export default function MessagesScreen() {
             const timeText = hoursAgo < 1 ? 'Just now' : hoursAgo < 24 ? `${hoursAgo}h ago` : `${Math.floor(hoursAgo / 24)}d ago`;
 
             return (
-              <TouchableOpacity
-                key={conversation.id}
-                style={styles.conversationCard}
-                onPress={() => router.push(`/chat/${conversation.id}`)}
-                activeOpacity={0.7}
-              >
-                <View style={styles.avatar}>
-                  <Text style={styles.avatarText}>{conversation.user.name[0]}</Text>
-                  {conversation.unread && <View style={styles.unreadDot} />}
-                </View>
-                <View style={styles.messageContent}>
-                  <View style={styles.messageHeader}>
-                    <Text style={styles.userName}>{conversation.user.name}</Text>
-                    <Text style={styles.timestamp}>{timeText}</Text>
+              <View key={conversation.id}>
+                <TouchableOpacity
+                  style={styles.conversationCard}
+                  onPress={() => router.push(`/chat/${conversation.id}`)}
+                  activeOpacity={0.7}
+                >
+                  <View style={styles.avatar}>
+                    <Text style={styles.avatarText}>{conversation.user.name[0]}</Text>
+                    {conversation.unread && <View style={styles.unreadDot} />}
                   </View>
-                  <Text
-                    style={[styles.lastMessage, conversation.unread && styles.unreadMessage]}
-                    numberOfLines={1}
+                  <View style={styles.messageContent}>
+                    <View style={styles.messageHeader}>
+                      <Text style={styles.userName}>{conversation.user.name}</Text>
+                      <Text style={styles.timestamp}>{timeText}</Text>
+                    </View>
+                    <Text
+                      style={[styles.lastMessage, conversation.unread && styles.unreadMessage]}
+                      numberOfLines={1}
+                    >
+                      {conversation.lastMessage}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.menuButton}
+                    onPress={() => setActiveMenu(conversation.id)}
+                    activeOpacity={0.7}
                   >
-                    {conversation.lastMessage}
-                  </Text>
-                </View>
-              </TouchableOpacity>
+                    <MoreVertical size={20} color={colors.dark.textSecondary} />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+
+                <Modal
+                  visible={activeMenu === conversation.id}
+                  transparent
+                  animationType="fade"
+                  onRequestClose={() => setActiveMenu(null)}
+                >
+                  <TouchableOpacity
+                    style={styles.menuOverlay}
+                    activeOpacity={1}
+                    onPress={() => setActiveMenu(null)}
+                  >
+                    <View style={styles.menuContent}>
+                      <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => {
+                          hideConversation(conversation.id);
+                          setActiveMenu(null);
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <EyeOff size={20} color={colors.dark.text} />
+                        <Text style={styles.menuItemText}>{t.actions.hideConversation}</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => {
+                          reportConversation(conversation.id);
+                          setActiveMenu(null);
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <Flag size={20} color={colors.dark.text} />
+                        <Text style={styles.menuItemText}>{t.actions.reportConversation}</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[styles.menuItem, styles.menuItemDanger]}
+                        onPress={() => {
+                          blockUser(conversation.user.id);
+                          setActiveMenu(null);
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <Ban size={20} color="#EF4444" />
+                        <Text style={[styles.menuItemText, styles.menuItemTextDanger]}>{t.actions.blockUser}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                </Modal>
+              </View>
             );
           })}
         </ScrollView>
@@ -144,6 +203,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     gap: 12,
+    position: 'relative',
   },
   avatar: {
     width: 52,
@@ -243,5 +303,45 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600' as const,
     color: colors.dark.text,
+  },
+  menuButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuContent: {
+    backgroundColor: colors.dark.surface,
+    borderRadius: 16,
+    padding: 8,
+    minWidth: 220,
+    borderWidth: 1,
+    borderColor: colors.dark.border,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  menuItemText: {
+    fontSize: 15,
+    fontWeight: '500' as const,
+    color: colors.dark.text,
+  },
+  menuItemDanger: {
+    backgroundColor: 'transparent',
+  },
+  menuItemTextDanger: {
+    color: '#EF4444',
   },
 });

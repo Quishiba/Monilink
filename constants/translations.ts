@@ -141,6 +141,15 @@ export interface Translations {
     sendCode: string;
     codeNotReceived: string;
   };
+  actions: {
+    hideOffer: string;
+    reportOffer: string;
+    hideConversation: string;
+    reportConversation: string;
+    hideMessage: string;
+    reportMessage: string;
+    blockUser: string;
+  };
   common: {
     save: string;
     cancel: string;
@@ -299,6 +308,15 @@ export const translations: Record<Language, Translations> = {
       sendCode: 'Envoyer le code',
       codeNotReceived: 'Vous n\'avez pas reçu le code?',
     },
+    actions: {
+      hideOffer: 'Masquer l\'annonce',
+      reportOffer: 'Signaler l\'annonce',
+      hideConversation: 'Masquer la conversation',
+      reportConversation: 'Signaler la conversation',
+      hideMessage: 'Masquer le message',
+      reportMessage: 'Signaler le message',
+      blockUser: 'Bloquer l\'utilisateur',
+    },
     common: {
       save: 'Enregistrer',
       cancel: 'Annuler',
@@ -455,6 +473,15 @@ export const translations: Record<Language, Translations> = {
       sendCode: 'Send code',
       codeNotReceived: 'Didn\'t receive the code?',
     },
+    actions: {
+      hideOffer: 'Hide offer',
+      reportOffer: 'Report offer',
+      hideConversation: 'Hide conversation',
+      reportConversation: 'Report conversation',
+      hideMessage: 'Hide message',
+      reportMessage: 'Report message',
+      blockUser: 'Block user',
+    },
     common: {
       save: 'Save',
       cancel: 'Cancel',
@@ -610,6 +637,15 @@ export const translations: Record<Language, Translations> = {
       phoneNumber: 'Telefonnummer',
       sendCode: 'Code senden',
       codeNotReceived: 'Haben Sie den Code nicht erhalten?',
+    },
+    actions: {
+      hideOffer: 'Angebot ausblenden',
+      reportOffer: 'Angebot melden',
+      hideConversation: 'Unterhaltung ausblenden',
+      reportConversation: 'Unterhaltung melden',
+      hideMessage: 'Nachricht ausblenden',
+      reportMessage: 'Nachricht melden',
+      blockUser: 'Benutzer blockieren',
     },
     common: {
       save: 'Speichern',

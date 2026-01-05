@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
-import { ArrowLeft, Send, Paperclip } from 'lucide-react-native';
+import { ArrowLeft, Send, Paperclip, MoreVertical, EyeOff, Flag, Ban } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { Message } from '@/types';
@@ -62,9 +62,10 @@ const MOCK_MESSAGES: Message[] = [
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { transactions, currentUser, isAdmin } = useApp();
+  const { transactions, currentUser, isAdmin, t, hideMessage, reportMessage, blockUser } = useApp();
   const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES);
   const [inputText, setInputText] = useState('');
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
   if (!currentUser) {
     return (
@@ -162,45 +163,107 @@ export default function ChatScreen() {
                   isMe ? styles.messageContainerMe : styles.messageContainerOther,
                 ]}
               >
-                {message.isAdmin && (
-                  <View style={styles.adminBadgeContainer}>
-                    <View style={styles.adminBadge}>
-                      <Text style={styles.adminBadgeText}>ADMIN</Text>
+                <View style={styles.messageRow}>
+                  {message.isAdmin && (
+                    <View style={styles.adminBadgeContainer}>
+                      <View style={styles.adminBadge}>
+                        <Text style={styles.adminBadgeText}>ADMIN</Text>
+                      </View>
+                    </View>
+                  )}
+                  <View style={styles.messageBubbleWrapper}>
+                    <View
+                      style={[
+                        styles.messageBubble,
+                        isMe ? styles.messageBubbleMe : styles.messageBubbleOther,
+                        message.isAdmin && styles.messageBubbleAdmin,
+                      ]}
+                    >
+                      {message.isAdmin && (
+                        <Text style={styles.adminSenderName}>
+                          {message.senderName || 'Admin'}
+                        </Text>
+                      )}
+                      <Text
+                        style={[
+                          styles.messageText,
+                          isMe ? styles.messageTextMe : styles.messageTextOther,
+                        ]}
+                      >
+                        {message.content}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.messageTime,
+                          isMe ? styles.messageTimeMe : styles.messageTimeOther,
+                        ]}
+                      >
+                        {new Date(message.timestamp).toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </Text>
                     </View>
                   </View>
-                )}
-                <View
-                  style={[
-                    styles.messageBubble,
-                    isMe ? styles.messageBubbleMe : styles.messageBubbleOther,
-                    message.isAdmin && styles.messageBubbleAdmin,
-                  ]}
-                >
-                  {message.isAdmin && (
-                    <Text style={styles.adminSenderName}>
-                      {message.senderName || 'Admin'}
-                    </Text>
-                  )}
-                  <Text
-                    style={[
-                      styles.messageText,
-                      isMe ? styles.messageTextMe : styles.messageTextOther,
-                    ]}
+                  <TouchableOpacity
+                    style={styles.messageMenuButton}
+                    onPress={() => setActiveMenu(message.id)}
+                    activeOpacity={0.7}
                   >
-                    {message.content}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.messageTime,
-                      isMe ? styles.messageTimeMe : styles.messageTimeOther,
-                    ]}
-                  >
-                    {new Date(message.timestamp).toLocaleTimeString('en-US', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </Text>
+                    <MoreVertical size={16} color={colors.dark.textSecondary} />
+                  </TouchableOpacity>
                 </View>
+                
+                <Modal
+                  visible={activeMenu === message.id}
+                  transparent
+                  animationType="fade"
+                  onRequestClose={() => setActiveMenu(null)}
+                >
+                  <TouchableOpacity
+                    style={styles.menuOverlay}
+                    activeOpacity={1}
+                    onPress={() => setActiveMenu(null)}
+                  >
+                    <View style={styles.menuContent}>
+                      <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => {
+                          hideMessage(message.id);
+                          setActiveMenu(null);
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <EyeOff size={20} color={colors.dark.text} />
+                        <Text style={styles.menuItemText}>{t.actions.hideMessage}</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => {
+                          reportMessage(message.id);
+                          setActiveMenu(null);
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <Flag size={20} color={colors.dark.text} />
+                        <Text style={styles.menuItemText}>{t.actions.reportMessage}</Text>
+                      </TouchableOpacity>
+                      {!isMe && (
+                        <TouchableOpacity
+                          style={[styles.menuItem, styles.menuItemDanger]}
+                          onPress={() => {
+                            blockUser(message.senderId);
+                            setActiveMenu(null);
+                          }}
+                          activeOpacity={0.7}
+                        >
+                          <Ban size={20} color="#EF4444" />
+                          <Text style={[styles.menuItemText, styles.menuItemTextDanger]}>{t.actions.blockUser}</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                </Modal>
               </View>
             );
           })}
@@ -291,7 +354,15 @@ const styles = StyleSheet.create({
   },
   messageContainer: {
     marginBottom: 12,
-    maxWidth: '80%',
+    maxWidth: '85%',
+  },
+  messageRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 4,
+  },
+  messageBubbleWrapper: {
+    flex: 1,
   },
   messageContainerMe: {
     alignSelf: 'flex-end',
@@ -397,5 +468,45 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
     color: '#EF4444',
     marginBottom: 4,
+  },
+  messageMenuButton: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuContent: {
+    backgroundColor: colors.dark.surface,
+    borderRadius: 16,
+    padding: 8,
+    minWidth: 200,
+    borderWidth: 1,
+    borderColor: colors.dark.border,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  menuItemText: {
+    fontSize: 15,
+    fontWeight: '500' as const,
+    color: colors.dark.text,
+  },
+  menuItemDanger: {
+    backgroundColor: 'transparent',
+  },
+  menuItemTextDanger: {
+    color: '#EF4444',
   },
 });

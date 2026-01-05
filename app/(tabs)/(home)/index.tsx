@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, Plus, TrendingUp, Shield, Clock, X } from 'lucide-react-native';
+import { Search, Plus, TrendingUp, Shield, Clock, X, MoreVertical, EyeOff, Flag, Ban } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { getCurrencyInfo } from '@/constants/currencies';
@@ -228,6 +228,8 @@ export default function HomeScreen() {
 
 function OfferCard({ offer }: { offer: Offer }) {
   const router = useRouter();
+  const { t, hideOffer, reportOffer, blockUser } = useApp();
+  const [showMenu, setShowMenu] = useState(false);
   const giveInfo = getCurrencyInfo(offer.giveCurrency);
   const getInfo = getCurrencyInfo(offer.getCurrency);
   
@@ -272,7 +274,16 @@ function OfferCard({ offer }: { offer: Offer }) {
             </View>
           </View>
         </TouchableOpacity>
-        <Text style={styles.timeAgo}>{timeText}</Text>
+        <View style={styles.offerHeaderRight}>
+          <Text style={styles.timeAgo}>{timeText}</Text>
+          <TouchableOpacity
+            style={styles.menuButton}
+            onPress={() => setShowMenu(true)}
+            activeOpacity={0.7}
+          >
+            <MoreVertical size={20} color={colors.dark.textSecondary} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.exchangeContainer}>
@@ -314,6 +325,55 @@ function OfferCard({ offer }: { offer: Offer }) {
           <Text style={styles.comment}>{offer.comment}</Text>
         </View>
       )}
+
+      <Modal
+        visible={showMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowMenu(false)}
+      >
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setShowMenu(false)}
+        >
+          <View style={styles.menuContent}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                hideOffer(offer.id);
+                setShowMenu(false);
+              }}
+              activeOpacity={0.7}
+            >
+              <EyeOff size={20} color={colors.dark.text} />
+              <Text style={styles.menuItemText}>{t.actions.hideOffer}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                reportOffer(offer.id);
+                setShowMenu(false);
+              }}
+              activeOpacity={0.7}
+            >
+              <Flag size={20} color={colors.dark.text} />
+              <Text style={styles.menuItemText}>{t.actions.reportOffer}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.menuItem, styles.menuItemDanger]}
+              onPress={() => {
+                blockUser(offer.user.id);
+                setShowMenu(false);
+              }}
+              activeOpacity={0.7}
+            >
+              <Ban size={20} color="#EF4444" />
+              <Text style={[styles.menuItemText, styles.menuItemTextDanger]}>{t.actions.blockUser}</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </TouchableOpacity>
   );
 }
@@ -459,9 +519,54 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.dark.textSecondary,
   },
+  offerHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   timeAgo: {
     fontSize: 13,
     color: colors.dark.textSecondary,
+  },
+  menuButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuContent: {
+    backgroundColor: colors.dark.surface,
+    borderRadius: 16,
+    padding: 8,
+    minWidth: 220,
+    borderWidth: 1,
+    borderColor: colors.dark.border,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
+  menuItemText: {
+    fontSize: 15,
+    fontWeight: '500' as const,
+    color: colors.dark.text,
+  },
+  menuItemDanger: {
+    backgroundColor: 'transparent',
+  },
+  menuItemTextDanger: {
+    color: '#EF4444',
   },
   exchangeContainer: {
     flexDirection: 'row',

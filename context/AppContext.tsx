@@ -29,6 +29,10 @@ export const [AppContext, useApp] = createContextHook(() => {
   const [language, setLanguage] = useState<Language>('fr');
   const [t, setT] = useState<Translations>(getTranslations('fr'));
   const [pushToken, setPushToken] = useState<string | null>(null);
+  const [hiddenOffers, setHiddenOffers] = useState<Set<string>>(new Set());
+  const [hiddenConversations, setHiddenConversations] = useState<Set<string>>(new Set());
+  const [hiddenMessages, setHiddenMessages] = useState<Set<string>>(new Set());
+  const [blockedUsers, setBlockedUsers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const loadAuthState = async () => {
@@ -305,8 +309,44 @@ export const [AppContext, useApp] = createContextHook(() => {
     }
   };
 
+  const hideOffer = (offerId: string) => {
+    setHiddenOffers(prev => new Set(prev).add(offerId));
+    console.log('Offer hidden:', offerId);
+  };
+
+  const reportOffer = (offerId: string) => {
+    console.log('Offer reported:', offerId);
+    alert(t.actions.reportOffer);
+  };
+
+  const hideConversation = (conversationId: string) => {
+    setHiddenConversations(prev => new Set(prev).add(conversationId));
+    console.log('Conversation hidden:', conversationId);
+  };
+
+  const reportConversation = (conversationId: string) => {
+    console.log('Conversation reported:', conversationId);
+    alert(t.actions.reportConversation);
+  };
+
+  const hideMessage = (messageId: string) => {
+    setHiddenMessages(prev => new Set(prev).add(messageId));
+    console.log('Message hidden:', messageId);
+  };
+
+  const reportMessage = (messageId: string) => {
+    console.log('Message reported:', messageId);
+    alert(t.actions.reportMessage);
+  };
+
+  const blockUser = (userId: string) => {
+    setBlockedUsers(prev => new Set(prev).add(userId));
+    console.log('User blocked:', userId);
+    alert(t.actions.blockUser);
+  };
+
   return {
-    offers,
+    offers: offers.filter(offer => !hiddenOffers.has(offer.id) && !blockedUsers.has(offer.user.id)),
     transactions,
     currentUser,
     kycData,
@@ -315,6 +355,10 @@ export const [AppContext, useApp] = createContextHook(() => {
     isAuthenticated,
     pushToken,
     isAdmin,
+    hiddenOffers,
+    hiddenConversations,
+    hiddenMessages,
+    blockedUsers,
     toggleAdminMode,
     addOffer,
     createTransaction,
@@ -330,5 +374,12 @@ export const [AppContext, useApp] = createContextHook(() => {
     logout,
     register,
     deleteAccount,
+    hideOffer,
+    reportOffer,
+    hideConversation,
+    reportConversation,
+    hideMessage,
+    reportMessage,
+    blockUser,
   };
 });
