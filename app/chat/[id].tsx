@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Keyboa
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
-import { ArrowLeft, Send, Paperclip } from 'lucide-react-native';
+import { ArrowLeft, Send, Paperclip, MoreVertical } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { Message } from '@/types';
@@ -66,6 +66,7 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES);
   const [inputText, setInputText] = useState('');
   const [showMenu, setShowMenu] = useState(false);
+  const [showChatMenu, setShowChatMenu] = useState(false);
 
   if (!currentUser) {
     return (
@@ -137,7 +138,12 @@ export default function ChatScreen() {
             <Text style={styles.headerTitle}>{otherUser?.name || 'Chat'}</Text>
             <Text style={styles.headerSubtitle}>Transaction #{id?.toString().slice(-4)}</Text>
           </View>
-          <View style={styles.placeholder} />
+          <TouchableOpacity 
+            style={styles.menuButton}
+            onPress={() => setShowChatMenu(true)}
+          >
+            <MoreVertical size={24} color={colors.dark.text} />
+          </TouchableOpacity>
         </View>
 
         <ScrollView
@@ -281,6 +287,54 @@ export default function ChatScreen() {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      <Modal
+        visible={showChatMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowChatMenu(false)}
+      >
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setShowChatMenu(false)}
+        >
+          <View style={styles.menuContent}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setShowChatMenu(false);
+                Alert.alert(t.common.success, t.common.hideChat);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.menuItemText}>{t.common.hideChat}</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setShowChatMenu(false);
+                Alert.alert(t.common.success, t.common.reportChat);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.menuItemText, styles.menuItemWarning]}>{t.common.reportChat}</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setShowChatMenu(false);
+                Alert.alert(t.common.success, t.common.blockUser);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.menuItemText, styles.menuItemDanger]}>{t.common.blockUser}</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -323,6 +377,12 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     width: 40,
+  },
+  menuButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   messagesContainer: {
     flex: 1,

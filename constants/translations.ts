@@ -161,6 +161,8 @@ export interface Translations {
     hideMessage: string;
     reportOffer: string;
     reportMessage: string;
+    hideChat: string;
+    reportChat: string;
   };
 }
 
@@ -326,6 +328,8 @@ export const translations: Record<Language, Translations> = {
       hideMessage: 'Masquer le message',
       reportOffer: 'Signaler l\'annonce',
       reportMessage: 'Signaler le message',
+      hideChat: 'Masquer le chat',
+      reportChat: 'Signaler le chat',
     },
   },
   en: {
@@ -489,6 +493,8 @@ export const translations: Record<Language, Translations> = {
       hideMessage: 'Hide Message',
       reportOffer: 'Report Offer',
       reportMessage: 'Report Message',
+      hideChat: 'Hide Chat',
+      reportChat: 'Report Chat',
     },
   },
   de: {
@@ -652,6 +658,8 @@ export const translations: Record<Language, Translations> = {
       hideMessage: 'Nachricht ausblenden',
       reportOffer: 'Angebot melden',
       reportMessage: 'Nachricht melden',
+      hideChat: 'Chat ausblenden',
+      reportChat: 'Chat melden',
     },
   },
 };
