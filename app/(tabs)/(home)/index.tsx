@@ -1,7 +1,7 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Modal, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, Plus, TrendingUp, Shield, Clock, X, MoreVertical, EyeOff, Flag, Ban } from 'lucide-react-native';
+import { Search, Plus, TrendingUp, Shield, Clock, X, MoreVertical } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { getCurrencyInfo } from '@/constants/currencies';
@@ -228,7 +228,7 @@ export default function HomeScreen() {
 
 function OfferCard({ offer }: { offer: Offer }) {
   const router = useRouter();
-  const { t, hideOffer, reportOffer, blockUser } = useApp();
+  const { t } = useApp();
   const [showMenu, setShowMenu] = useState(false);
   const giveInfo = getCurrencyInfo(offer.giveCurrency);
   const getInfo = getCurrencyInfo(offer.getCurrency);
@@ -247,9 +247,25 @@ function OfferCard({ offer }: { offer: Offer }) {
     return user.name;
   };
 
+  const handleHideOffer = () => {
+    setShowMenu(false);
+    Alert.alert(t.common.success, t.common.hideOffer);
+  };
+
+  const handleReportOffer = () => {
+    setShowMenu(false);
+    Alert.alert(t.common.success, t.common.reportOffer);
+  };
+
+  const handleBlockUser = () => {
+    setShowMenu(false);
+    Alert.alert(t.common.success, t.common.blockUser);
+  };
+
   return (
-    <TouchableOpacity style={styles.offerCard} onPress={() => router.push(`/transaction/${offer.id}`)} activeOpacity={0.7}>
-      <View style={styles.offerHeader}>
+    <View>
+      <TouchableOpacity style={styles.offerCard} onPress={() => router.push(`/transaction/${offer.id}`)} activeOpacity={0.7}>
+        <View style={styles.offerHeader}>
         <TouchableOpacity 
           style={styles.userInfo}
           onPress={() => router.push(`/profile/${offer.user.id}`)}
@@ -274,11 +290,14 @@ function OfferCard({ offer }: { offer: Offer }) {
             </View>
           </View>
         </TouchableOpacity>
-        <View style={styles.offerHeaderRight}>
+        <View style={styles.headerRight}>
           <Text style={styles.timeAgo}>{timeText}</Text>
           <TouchableOpacity
+            onPress={(e) => {
+              e.stopPropagation();
+              setShowMenu(true);
+            }}
             style={styles.menuButton}
-            onPress={() => setShowMenu(true)}
             activeOpacity={0.7}
           >
             <MoreVertical size={20} color={colors.dark.textSecondary} />
@@ -325,6 +344,7 @@ function OfferCard({ offer }: { offer: Offer }) {
           <Text style={styles.comment}>{offer.comment}</Text>
         </View>
       )}
+      </TouchableOpacity>
 
       <Modal
         visible={showMenu}
@@ -340,41 +360,31 @@ function OfferCard({ offer }: { offer: Offer }) {
           <View style={styles.menuContent}>
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => {
-                hideOffer(offer.id);
-                setShowMenu(false);
-              }}
+              onPress={handleHideOffer}
               activeOpacity={0.7}
             >
-              <EyeOff size={20} color={colors.dark.text} />
-              <Text style={styles.menuItemText}>{t.actions.hideOffer}</Text>
+              <Text style={styles.menuItemText}>{t.common.hideOffer}</Text>
             </TouchableOpacity>
+            <View style={styles.menuDivider} />
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => {
-                reportOffer(offer.id);
-                setShowMenu(false);
-              }}
+              onPress={handleReportOffer}
               activeOpacity={0.7}
             >
-              <Flag size={20} color={colors.dark.text} />
-              <Text style={styles.menuItemText}>{t.actions.reportOffer}</Text>
+              <Text style={[styles.menuItemText, styles.menuItemWarning]}>{t.common.reportOffer}</Text>
             </TouchableOpacity>
+            <View style={styles.menuDivider} />
             <TouchableOpacity
-              style={[styles.menuItem, styles.menuItemDanger]}
-              onPress={() => {
-                blockUser(offer.user.id);
-                setShowMenu(false);
-              }}
+              style={styles.menuItem}
+              onPress={handleBlockUser}
               activeOpacity={0.7}
             >
-              <Ban size={20} color="#EF4444" />
-              <Text style={[styles.menuItemText, styles.menuItemTextDanger]}>{t.actions.blockUser}</Text>
+              <Text style={[styles.menuItemText, styles.menuItemDanger]}>{t.common.blockUser}</Text>
             </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
-    </TouchableOpacity>
+    </View>
   );
 }
 
@@ -519,7 +529,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.dark.textSecondary,
   },
-  offerHeaderRight: {
+  headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
@@ -533,40 +543,6 @@ const styles = StyleSheet.create({
     height: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 16,
-  },
-  menuOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  menuContent: {
-    backgroundColor: colors.dark.surface,
-    borderRadius: 16,
-    padding: 8,
-    minWidth: 220,
-    borderWidth: 1,
-    borderColor: colors.dark.border,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-  },
-  menuItemText: {
-    fontSize: 15,
-    fontWeight: '500' as const,
-    color: colors.dark.text,
-  },
-  menuItemDanger: {
-    backgroundColor: 'transparent',
-  },
-  menuItemTextDanger: {
-    color: '#EF4444',
   },
   exchangeContainer: {
     flexDirection: 'row',
@@ -795,5 +771,37 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600' as const,
     color: colors.dark.text,
+  },
+  menuOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuContent: {
+    backgroundColor: colors.dark.surface,
+    borderRadius: 12,
+    width: '80%',
+    maxWidth: 300,
+    overflow: 'hidden',
+  },
+  menuItem: {
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+  },
+  menuItemText: {
+    fontSize: 16,
+    color: colors.dark.text,
+    textAlign: 'center',
+  },
+  menuItemWarning: {
+    color: '#F59E0B',
+  },
+  menuItemDanger: {
+    color: '#EF4444',
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: colors.dark.border,
   },
 });

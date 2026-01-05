@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, Modal, Alert } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
-import { ArrowLeft, Send, Paperclip, MoreVertical, EyeOff, Flag, Ban } from 'lucide-react-native';
+import { ArrowLeft, Send, Paperclip } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { Message } from '@/types';
@@ -62,10 +62,10 @@ const MOCK_MESSAGES: Message[] = [
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { transactions, currentUser, isAdmin, t, hideMessage, reportMessage, blockUser } = useApp();
+  const { transactions, currentUser, isAdmin, t } = useApp();
   const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES);
   const [inputText, setInputText] = useState('');
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [showMenu, setShowMenu] = useState(false);
 
   if (!currentUser) {
     return (
@@ -156,115 +156,58 @@ export default function ChatScreen() {
 
             const isMe = message.senderId === currentUser.id;
             return (
-              <View
+              <TouchableOpacity
                 key={message.id}
-                style={[
-                  styles.messageContainer,
-                  isMe ? styles.messageContainerMe : styles.messageContainerOther,
-                ]}
+                onLongPress={() => setShowMenu(true)}
+                activeOpacity={0.9}
               >
-                <View style={styles.messageRow}>
-                  {message.isAdmin && (
-                    <View style={styles.adminBadgeContainer}>
-                      <View style={styles.adminBadge}>
-                        <Text style={styles.adminBadgeText}>ADMIN</Text>
-                      </View>
-                    </View>
-                  )}
-                  <View style={styles.messageBubbleWrapper}>
-                    <View
-                      style={[
-                        styles.messageBubble,
-                        isMe ? styles.messageBubbleMe : styles.messageBubbleOther,
-                        message.isAdmin && styles.messageBubbleAdmin,
-                      ]}
-                    >
-                      {message.isAdmin && (
-                        <Text style={styles.adminSenderName}>
-                          {message.senderName || 'Admin'}
-                        </Text>
-                      )}
-                      <Text
-                        style={[
-                          styles.messageText,
-                          isMe ? styles.messageTextMe : styles.messageTextOther,
-                        ]}
-                      >
-                        {message.content}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.messageTime,
-                          isMe ? styles.messageTimeMe : styles.messageTimeOther,
-                        ]}
-                      >
-                        {new Date(message.timestamp).toLocaleTimeString('en-US', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </Text>
+                <View
+                  style={[
+                    styles.messageContainer,
+                    isMe ? styles.messageContainerMe : styles.messageContainerOther,
+                  ]}
+                >
+                {message.isAdmin && (
+                  <View style={styles.adminBadgeContainer}>
+                    <View style={styles.adminBadge}>
+                      <Text style={styles.adminBadgeText}>ADMIN</Text>
                     </View>
                   </View>
-                  <TouchableOpacity
-                    style={styles.messageMenuButton}
-                    onPress={() => setActiveMenu(message.id)}
-                    activeOpacity={0.7}
-                  >
-                    <MoreVertical size={16} color={colors.dark.textSecondary} />
-                  </TouchableOpacity>
-                </View>
-                
-                <Modal
-                  visible={activeMenu === message.id}
-                  transparent
-                  animationType="fade"
-                  onRequestClose={() => setActiveMenu(null)}
+                )}
+                <View
+                  style={[
+                    styles.messageBubble,
+                    isMe ? styles.messageBubbleMe : styles.messageBubbleOther,
+                    message.isAdmin && styles.messageBubbleAdmin,
+                  ]}
                 >
-                  <TouchableOpacity
-                    style={styles.menuOverlay}
-                    activeOpacity={1}
-                    onPress={() => setActiveMenu(null)}
+                  {message.isAdmin && (
+                    <Text style={styles.adminSenderName}>
+                      {message.senderName || 'Admin'}
+                    </Text>
+                  )}
+                  <Text
+                    style={[
+                      styles.messageText,
+                      isMe ? styles.messageTextMe : styles.messageTextOther,
+                    ]}
                   >
-                    <View style={styles.menuContent}>
-                      <TouchableOpacity
-                        style={styles.menuItem}
-                        onPress={() => {
-                          hideMessage(message.id);
-                          setActiveMenu(null);
-                        }}
-                        activeOpacity={0.7}
-                      >
-                        <EyeOff size={20} color={colors.dark.text} />
-                        <Text style={styles.menuItemText}>{t.actions.hideMessage}</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.menuItem}
-                        onPress={() => {
-                          reportMessage(message.id);
-                          setActiveMenu(null);
-                        }}
-                        activeOpacity={0.7}
-                      >
-                        <Flag size={20} color={colors.dark.text} />
-                        <Text style={styles.menuItemText}>{t.actions.reportMessage}</Text>
-                      </TouchableOpacity>
-                      {!isMe && (
-                        <TouchableOpacity
-                          style={[styles.menuItem, styles.menuItemDanger]}
-                          onPress={() => {
-                            blockUser(message.senderId);
-                            setActiveMenu(null);
-                          }}
-                          activeOpacity={0.7}
-                        >
-                          <Ban size={20} color="#EF4444" />
-                          <Text style={[styles.menuItemText, styles.menuItemTextDanger]}>{t.actions.blockUser}</Text>
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                </Modal>
-              </View>
+                    {message.content}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.messageTime,
+                      isMe ? styles.messageTimeMe : styles.messageTimeOther,
+                    ]}
+                  >
+                    {new Date(message.timestamp).toLocaleTimeString('en-US', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </Text>
+                </View>
+                </View>
+              </TouchableOpacity>
             );
           })}
         </ScrollView>
@@ -290,6 +233,54 @@ export default function ChatScreen() {
           </TouchableOpacity>
         </View>
       </SafeAreaView>
+
+      <Modal
+        visible={showMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowMenu(false)}
+      >
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setShowMenu(false)}
+        >
+          <View style={styles.menuContent}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setShowMenu(false);
+                Alert.alert(t.common.success, t.common.hideMessage);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.menuItemText}>{t.common.hideMessage}</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setShowMenu(false);
+                Alert.alert(t.common.success, t.common.reportMessage);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.menuItemText, styles.menuItemWarning]}>{t.common.reportMessage}</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={() => {
+                setShowMenu(false);
+                Alert.alert(t.common.success, t.common.blockUser);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.menuItemText, styles.menuItemDanger]}>{t.common.blockUser}</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -354,15 +345,7 @@ const styles = StyleSheet.create({
   },
   messageContainer: {
     marginBottom: 12,
-    maxWidth: '85%',
-  },
-  messageRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 4,
-  },
-  messageBubbleWrapper: {
-    flex: 1,
+    maxWidth: '80%',
   },
   messageContainerMe: {
     alignSelf: 'flex-end',
@@ -469,13 +452,6 @@ const styles = StyleSheet.create({
     color: '#EF4444',
     marginBottom: 4,
   },
-  messageMenuButton: {
-    width: 24,
-    height: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 4,
-  },
   menuOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -484,29 +460,28 @@ const styles = StyleSheet.create({
   },
   menuContent: {
     backgroundColor: colors.dark.surface,
-    borderRadius: 16,
-    padding: 8,
-    minWidth: 200,
-    borderWidth: 1,
-    borderColor: colors.dark.border,
+    borderRadius: 12,
+    width: '80%',
+    maxWidth: 300,
+    overflow: 'hidden',
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
   },
   menuItemText: {
-    fontSize: 15,
-    fontWeight: '500' as const,
+    fontSize: 16,
     color: colors.dark.text,
+    textAlign: 'center',
+  },
+  menuItemWarning: {
+    color: '#F59E0B',
   },
   menuItemDanger: {
-    backgroundColor: 'transparent',
-  },
-  menuItemTextDanger: {
     color: '#EF4444',
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: colors.dark.border,
   },
 });

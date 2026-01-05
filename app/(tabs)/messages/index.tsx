@@ -1,15 +1,115 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MoreVertical, EyeOff, Flag, Ban } from 'lucide-react-native';
+import { MoreVertical } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { useEffect, useState } from 'react';
 
+function ConversationCard({ conversation, onPress }: { conversation: any; onPress: () => void }) {
+  const { t } = useApp();
+  const [showMenu, setShowMenu] = useState(false);
+
+  const hoursAgo = Math.floor((Date.now() - conversation.timestamp.getTime()) / (1000 * 60 * 60));
+  const timeText = hoursAgo < 1 ? 'Just now' : hoursAgo < 24 ? `${hoursAgo}h ago` : `${Math.floor(hoursAgo / 24)}d ago`;
+
+  const handleHideMessage = () => {
+    setShowMenu(false);
+    Alert.alert(t.common.success, t.common.hideMessage);
+  };
+
+  const handleReportMessage = () => {
+    setShowMenu(false);
+    Alert.alert(t.common.success, t.common.reportMessage);
+  };
+
+  const handleBlockUser = () => {
+    setShowMenu(false);
+    Alert.alert(t.common.success, t.common.blockUser);
+  };
+
+  return (
+    <View>
+      <TouchableOpacity
+        style={styles.conversationCard}
+        onPress={onPress}
+        activeOpacity={0.7}
+      >
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>{conversation.user.name[0]}</Text>
+          {conversation.unread && <View style={styles.unreadDot} />}
+        </View>
+        <View style={styles.messageContent}>
+          <View style={styles.messageHeader}>
+            <Text style={styles.userName}>{conversation.user.name}</Text>
+            <View style={styles.messageHeaderRight}>
+              <Text style={styles.timestamp}>{timeText}</Text>
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation();
+                  setShowMenu(true);
+                }}
+                style={styles.menuButton}
+                activeOpacity={0.7}
+              >
+                <MoreVertical size={18} color={colors.dark.textSecondary} />
+              </TouchableOpacity>
+            </View>
+          </View>
+          <Text
+            style={[styles.lastMessage, conversation.unread && styles.unreadMessage]}
+            numberOfLines={1}
+          >
+            {conversation.lastMessage}
+          </Text>
+        </View>
+      </TouchableOpacity>
+
+      <Modal
+        visible={showMenu}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowMenu(false)}
+      >
+        <TouchableOpacity
+          style={styles.menuOverlay}
+          activeOpacity={1}
+          onPress={() => setShowMenu(false)}
+        >
+          <View style={styles.menuContent}>
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={handleHideMessage}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.menuItemText}>{t.common.hideMessage}</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={handleReportMessage}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.menuItemText, styles.menuItemWarning]}>{t.common.reportMessage}</Text>
+            </TouchableOpacity>
+            <View style={styles.menuDivider} />
+            <TouchableOpacity
+              style={styles.menuItem}
+              onPress={handleBlockUser}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.menuItemText, styles.menuItemDanger]}>{t.common.blockUser}</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
+  );
+}
+
 export default function MessagesScreen() {
   const router = useRouter();
-  const { offers, isAuthenticated, t, hideConversation, reportConversation, blockUser } = useApp();
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const { offers, isAuthenticated, t } = useApp();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -72,93 +172,13 @@ export default function MessagesScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.contentContainer}
         >
-          {conversations.map(conversation => {
-            const hoursAgo = Math.floor((Date.now() - conversation.timestamp.getTime()) / (1000 * 60 * 60));
-            const timeText = hoursAgo < 1 ? 'Just now' : hoursAgo < 24 ? `${hoursAgo}h ago` : `${Math.floor(hoursAgo / 24)}d ago`;
-
-            return (
-              <View key={conversation.id}>
-                <TouchableOpacity
-                  style={styles.conversationCard}
-                  onPress={() => router.push(`/chat/${conversation.id}`)}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.avatar}>
-                    <Text style={styles.avatarText}>{conversation.user.name[0]}</Text>
-                    {conversation.unread && <View style={styles.unreadDot} />}
-                  </View>
-                  <View style={styles.messageContent}>
-                    <View style={styles.messageHeader}>
-                      <Text style={styles.userName}>{conversation.user.name}</Text>
-                      <Text style={styles.timestamp}>{timeText}</Text>
-                    </View>
-                    <Text
-                      style={[styles.lastMessage, conversation.unread && styles.unreadMessage]}
-                      numberOfLines={1}
-                    >
-                      {conversation.lastMessage}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.menuButton}
-                    onPress={() => setActiveMenu(conversation.id)}
-                    activeOpacity={0.7}
-                  >
-                    <MoreVertical size={20} color={colors.dark.textSecondary} />
-                  </TouchableOpacity>
-                </TouchableOpacity>
-
-                <Modal
-                  visible={activeMenu === conversation.id}
-                  transparent
-                  animationType="fade"
-                  onRequestClose={() => setActiveMenu(null)}
-                >
-                  <TouchableOpacity
-                    style={styles.menuOverlay}
-                    activeOpacity={1}
-                    onPress={() => setActiveMenu(null)}
-                  >
-                    <View style={styles.menuContent}>
-                      <TouchableOpacity
-                        style={styles.menuItem}
-                        onPress={() => {
-                          hideConversation(conversation.id);
-                          setActiveMenu(null);
-                        }}
-                        activeOpacity={0.7}
-                      >
-                        <EyeOff size={20} color={colors.dark.text} />
-                        <Text style={styles.menuItemText}>{t.actions.hideConversation}</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.menuItem}
-                        onPress={() => {
-                          reportConversation(conversation.id);
-                          setActiveMenu(null);
-                        }}
-                        activeOpacity={0.7}
-                      >
-                        <Flag size={20} color={colors.dark.text} />
-                        <Text style={styles.menuItemText}>{t.actions.reportConversation}</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[styles.menuItem, styles.menuItemDanger]}
-                        onPress={() => {
-                          blockUser(conversation.user.id);
-                          setActiveMenu(null);
-                        }}
-                        activeOpacity={0.7}
-                      >
-                        <Ban size={20} color="#EF4444" />
-                        <Text style={[styles.menuItemText, styles.menuItemTextDanger]}>{t.actions.blockUser}</Text>
-                      </TouchableOpacity>
-                    </View>
-                  </TouchableOpacity>
-                </Modal>
-              </View>
-            );
-          })}
+          {conversations.map(conversation => (
+            <ConversationCard
+              key={conversation.id}
+              conversation={conversation}
+              onPress={() => router.push(`/chat/${conversation.id}`)}
+            />
+          ))}
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -203,7 +223,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     gap: 12,
-    position: 'relative',
   },
   avatar: {
     width: 52,
@@ -238,6 +257,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 4,
+  },
+  messageHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  menuButton: {
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   userName: {
     fontSize: 16,
@@ -304,13 +334,6 @@ const styles = StyleSheet.create({
     fontWeight: '600' as const,
     color: colors.dark.text,
   },
-  menuButton: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 16,
-  },
   menuOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -319,29 +342,28 @@ const styles = StyleSheet.create({
   },
   menuContent: {
     backgroundColor: colors.dark.surface,
-    borderRadius: 16,
-    padding: 8,
-    minWidth: 220,
-    borderWidth: 1,
-    borderColor: colors.dark.border,
+    borderRadius: 12,
+    width: '80%',
+    maxWidth: 300,
+    overflow: 'hidden',
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
   },
   menuItemText: {
-    fontSize: 15,
-    fontWeight: '500' as const,
+    fontSize: 16,
     color: colors.dark.text,
+    textAlign: 'center',
+  },
+  menuItemWarning: {
+    color: '#F59E0B',
   },
   menuItemDanger: {
-    backgroundColor: 'transparent',
-  },
-  menuItemTextDanger: {
     color: '#EF4444',
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: colors.dark.border,
   },
 });
