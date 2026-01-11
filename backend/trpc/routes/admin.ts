@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../create-context";
+import { MOCK_USERS } from "@/mocks/users";
 
 export const adminRouter = createTRPCRouter({
   getStats: publicProcedure.query(() => {
@@ -29,11 +30,34 @@ export const adminRouter = createTRPCRouter({
       })
     )
     .query(({ input }) => {
+      let filteredUsers = [...MOCK_USERS];
+
+      if (input.filter === 'kyc_pending') {
+        filteredUsers = filteredUsers.filter(u => u.kycStatus === 'pending');
+      } else if (input.filter === 'suspended') {
+        filteredUsers = filteredUsers.filter(u => u.kycStatus === 'rejected');
+      } else if (input.filter === 'active') {
+        filteredUsers = filteredUsers.filter(u => u.kycStatus === 'verified');
+      }
+
+      if (input.search) {
+        const searchLower = input.search.toLowerCase();
+        filteredUsers = filteredUsers.filter(u => 
+          u.name.toLowerCase().includes(searchLower) ||
+          u.id.toLowerCase().includes(searchLower)
+        );
+      }
+
+      const total = filteredUsers.length;
+      const totalPages = Math.ceil(total / input.limit);
+      const start = (input.page - 1) * input.limit;
+      const users = filteredUsers.slice(start, start + input.limit);
+
       return {
-        users: [],
-        total: 0,
+        users,
+        total,
         page: input.page,
-        totalPages: 0,
+        totalPages,
       };
     }),
 
