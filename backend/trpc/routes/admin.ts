@@ -1,6 +1,144 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../create-context";
 import { MOCK_USERS } from "@/mocks/users";
+import { Transaction, Message } from "@/types";
+
+const MOCK_TRANSACTIONS: Transaction[] = [
+  {
+    id: 'txn1',
+    offerId: 'off1',
+    userA: MOCK_USERS[0],
+    userB: MOCK_USERS[1],
+    giveCurrency: 'EUR',
+    giveAmount: 500,
+    getCurrency: 'XAF',
+    getAmount: 328000,
+    rate: 656,
+    status: 'accepted',
+    paymentMethod: 'SEPA',
+    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'txn2',
+    offerId: 'off2',
+    userA: MOCK_USERS[2],
+    userB: MOCK_USERS[3],
+    giveCurrency: 'GBP',
+    giveAmount: 1000,
+    getCurrency: 'EUR',
+    getAmount: 1175,
+    rate: 1.175,
+    status: 'in_progress',
+    paymentMethod: 'Bank Transfer',
+    createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'txn3',
+    offerId: 'off3',
+    userA: MOCK_USERS[4],
+    userB: MOCK_USERS[0],
+    giveCurrency: 'USD',
+    giveAmount: 800,
+    getCurrency: 'EUR',
+    getAmount: 740,
+    rate: 0.925,
+    status: 'completed',
+    paymentMethod: 'Wise',
+    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'txn4',
+    offerId: 'off4',
+    userA: MOCK_USERS[1],
+    userB: MOCK_USERS[2],
+    giveCurrency: 'XAF',
+    giveAmount: 200000,
+    getCurrency: 'EUR',
+    getAmount: 305,
+    rate: 655.74,
+    status: 'disputed',
+    paymentMethod: 'Mobile Money',
+    createdAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'txn5',
+    offerId: 'off5',
+    userA: MOCK_USERS[3],
+    userB: MOCK_USERS[4],
+    giveCurrency: 'EUR',
+    giveAmount: 250,
+    getCurrency: 'XOF',
+    getAmount: 164000,
+    rate: 656,
+    status: 'completed',
+    paymentMethod: 'Mobile Money',
+    createdAt: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 47 * 60 * 60 * 1000).toISOString(),
+  },
+];
+
+const MOCK_MESSAGES: Message[] = [
+  {
+    id: 'msg1',
+    transactionId: 'txn1',
+    senderId: '1',
+    content: 'Hi! I am ready to proceed with the transaction.',
+    type: 'text',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'msg2',
+    transactionId: 'txn1',
+    senderId: '2',
+    content: 'Great! Please send the payment to my account.',
+    type: 'text',
+    timestamp: new Date(Date.now() - 1.5 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'msg3',
+    transactionId: 'txn2',
+    senderId: '3',
+    content: 'Payment sent! Please confirm.',
+    type: 'text',
+    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'msg4',
+    transactionId: 'txn2',
+    senderId: '4',
+    content: 'Received! I will send my part now.',
+    type: 'text',
+    timestamp: new Date(Date.now() - 3.5 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'msg5',
+    transactionId: 'txn3',
+    senderId: '5',
+    content: 'Transaction completed successfully! Thank you.',
+    type: 'text',
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'msg6',
+    transactionId: 'txn4',
+    senderId: '2',
+    content: 'I did not receive the full amount!',
+    type: 'text',
+    timestamp: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'msg7',
+    transactionId: 'txn4',
+    senderId: '3',
+    content: 'I sent the correct amount. Please check again.',
+    type: 'text',
+    timestamp: new Date(Date.now() - 11 * 60 * 60 * 1000).toISOString(),
+  },
+];
 
 export const adminRouter = createTRPCRouter({
   getStats: publicProcedure.query(() => {
@@ -93,11 +231,22 @@ export const adminRouter = createTRPCRouter({
       })
     )
     .query(({ input }) => {
+      let filteredTransactions = [...MOCK_TRANSACTIONS];
+
+      if (input.status) {
+        filteredTransactions = filteredTransactions.filter(t => t.status === input.status);
+      }
+
+      const total = filteredTransactions.length;
+      const totalPages = Math.ceil(total / input.limit);
+      const start = (input.page - 1) * input.limit;
+      const transactions = filteredTransactions.slice(start, start + input.limit);
+
       return {
-        transactions: [],
-        total: 0,
+        transactions,
+        total,
         page: input.page,
-        totalPages: 0,
+        totalPages,
       };
     }),
 
@@ -122,11 +271,22 @@ export const adminRouter = createTRPCRouter({
       })
     )
     .query(({ input }) => {
+      let filteredUsers = [...MOCK_USERS];
+
+      if (input.status !== 'all') {
+        filteredUsers = filteredUsers.filter(u => u.kycStatus === input.status);
+      }
+
+      const total = filteredUsers.length;
+      const totalPages = Math.ceil(total / input.limit);
+      const start = (input.page - 1) * input.limit;
+      const verifications = filteredUsers.slice(start, start + input.limit);
+
       return {
-        verifications: [],
-        total: 0,
+        verifications,
+        total,
         page: input.page,
-        totalPages: 0,
+        totalPages,
       };
     }),
 
@@ -161,11 +321,18 @@ export const adminRouter = createTRPCRouter({
       })
     )
     .query(({ input }) => {
+      const filteredMessages = [...MOCK_MESSAGES];
+
+      const total = filteredMessages.length;
+      const totalPages = Math.ceil(total / input.limit);
+      const start = (input.page - 1) * input.limit;
+      const messages = filteredMessages.slice(start, start + input.limit);
+
       return {
-        messages: [],
-        total: 0,
+        messages,
+        total,
         page: input.page,
-        totalPages: 0,
+        totalPages,
       };
     }),
 
