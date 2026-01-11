@@ -7,6 +7,8 @@ import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
 import { Message } from '@/types';
 import { sendMessageNotification } from '@/lib/notification-service';
+import { sendMessageNotificationEmail } from '@/lib/email-service';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MOCK_MESSAGES: Message[] = [
   {
@@ -117,8 +119,28 @@ export default function ChatScreen() {
         inputText.substring(0, 100),
         id as string
       ).catch(error => {
-        console.error('Failed to send message notification:', error);
+        console.error('Failed to send push notification:', error);
       });
+
+      try {
+        const userEmail = await AsyncStorage.getItem('user_email');
+        if (userEmail) {
+          const fullSenderName = currentUser.firstName && currentUser.lastName 
+            ? `${currentUser.firstName} ${currentUser.lastName}`
+            : currentUser.name;
+          
+          await sendMessageNotificationEmail(
+            userEmail,
+            otherUser.name,
+            fullSenderName,
+            id as string,
+            inputText
+          );
+          console.log('[Email] Message notification sent to:', userEmail);
+        }
+      } catch (error) {
+        console.error('Failed to send email notification:', error);
+      }
     }
   };
 

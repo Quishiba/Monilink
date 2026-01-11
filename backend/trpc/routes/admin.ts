@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../create-context";
 import { MOCK_USERS } from "@/mocks/users";
 import { Transaction, Message } from "@/types";
+import { emailService } from "@/lib/email-service";
 
 const MOCK_TRANSACTIONS: Transaction[] = [
   {
@@ -210,15 +211,42 @@ export const adminRouter = createTRPCRouter({
       z.object({
         userId: z.string(),
         reason: z.string(),
+        userEmail: z.string().optional(),
+        userName: z.string().optional(),
       })
     )
-    .mutation(({ input }) => {
+    .mutation(async ({ input }) => {
+      console.log('[Admin] Suspending user:', input.userId);
+      
+      if (input.userEmail && input.userName) {
+        await emailService.sendAccountSuspensionEmail(
+          input.userEmail,
+          input.userName,
+          input.reason
+        );
+      }
+      
       return { success: true };
     }),
 
   activateUser: publicProcedure
-    .input(z.object({ userId: z.string() }))
-    .mutation(({ input }) => {
+    .input(
+      z.object({
+        userId: z.string(),
+        userEmail: z.string().optional(),
+        userName: z.string().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      console.log('[Admin] Activating user:', input.userId);
+      
+      if (input.userEmail && input.userName) {
+        await emailService.sendAccountReactivationEmail(
+          input.userEmail,
+          input.userName
+        );
+      }
+      
       return { success: true };
     }),
 
@@ -256,9 +284,26 @@ export const adminRouter = createTRPCRouter({
         transactionId: z.string(),
         status: z.string(),
         note: z.string().optional(),
+        userEmail: z.string().optional(),
+        userName: z.string().optional(),
+        currency: z.string().optional(),
+        amount: z.number().optional(),
       })
     )
-    .mutation(({ input }) => {
+    .mutation(async ({ input }) => {
+      console.log('[Admin] Updating transaction status:', input.transactionId, input.status);
+      
+      if (input.userEmail && input.userName && input.currency && input.amount) {
+        await emailService.sendTransactionStatusEmail(
+          input.userEmail,
+          input.userName,
+          input.transactionId,
+          input.status,
+          input.currency,
+          input.amount
+        );
+      }
+      
       return { success: true };
     }),
 
@@ -295,9 +340,21 @@ export const adminRouter = createTRPCRouter({
       z.object({
         userId: z.string(),
         note: z.string().optional(),
+        userEmail: z.string().optional(),
+        userName: z.string().optional(),
       })
     )
-    .mutation(({ input }) => {
+    .mutation(async ({ input }) => {
+      console.log('[Admin] Verifying KYC for user:', input.userId);
+      
+      if (input.userEmail && input.userName) {
+        await emailService.sendKycStatusEmail(
+          input.userEmail,
+          input.userName,
+          'verified'
+        );
+      }
+      
       return { success: true };
     }),
 
@@ -306,9 +363,22 @@ export const adminRouter = createTRPCRouter({
       z.object({
         userId: z.string(),
         reason: z.string(),
+        userEmail: z.string().optional(),
+        userName: z.string().optional(),
       })
     )
-    .mutation(({ input }) => {
+    .mutation(async ({ input }) => {
+      console.log('[Admin] Rejecting KYC for user:', input.userId);
+      
+      if (input.userEmail && input.userName) {
+        await emailService.sendKycStatusEmail(
+          input.userEmail,
+          input.userName,
+          'rejected',
+          input.reason
+        );
+      }
+      
       return { success: true };
     }),
 

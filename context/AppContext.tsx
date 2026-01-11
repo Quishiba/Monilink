@@ -6,6 +6,7 @@ import { MOCK_OFFERS } from '@/mocks/offers';
 import { getCurrentUser } from '@/mocks/users';
 import { Language, getTranslations, Translations } from '@/constants/translations';
 import { registerForPushNotificationsAsync, sendTransactionStatusNotification, sendKycVerificationNotification } from '@/lib/notification-service';
+import { sendTransactionNotificationEmail, sendKycNotificationEmail } from '@/lib/email-service';
 
 export const [AppContext, useApp] = createContextHook(() => {
   const [offers, setOffers] = useState<Offer[]>(MOCK_OFFERS);
@@ -235,7 +236,7 @@ export const [AppContext, useApp] = createContextHook(() => {
     return transaction;
   };
 
-  const updateTransactionStatus = (id: string, status: Transaction['status']) => {
+  const updateTransactionStatus = async (id: string, status: Transaction['status']) => {
     setTransactions(prev =>
       prev.map(tx =>
         tx.id === id
@@ -243,9 +244,30 @@ export const [AppContext, useApp] = createContextHook(() => {
           : tx
       )
     );
+    
     sendTransactionStatusNotification(status, id).catch(error => {
-      console.error('Failed to send transaction notification:', error);
+      console.error('Failed to send push notification:', error);
     });
+
+    try {
+      const transaction = transactions.find(tx => tx.id === id);
+      if (transaction && currentUser) {
+        const userEmail = await AsyncStorage.getItem('user_email');
+        if (userEmail) {
+          await sendTransactionNotificationEmail(
+            userEmail,
+            currentUser.name,
+            id,
+            status,
+            transaction.giveCurrency,
+            transaction.giveAmount
+          );
+          console.log('[Email] Transaction notification sent to:', userEmail);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+    }
   };
 
   const updateKycData = (updates: Partial<KYCData>) => {
@@ -272,15 +294,30 @@ export const [AppContext, useApp] = createContextHook(() => {
     setKycData(prev => ({ ...prev, currentStep: step }));
   };
 
-  const submitKyc = () => {
+  const submitKyc = async () => {
     setKycData(prev => ({
       ...prev,
       status: 'pending',
       submittedAt: new Date().toISOString(),
     }));
+    
     sendKycVerificationNotification('pending').catch(error => {
-      console.error('Failed to send KYC notification:', error);
+      console.error('Failed to send push notification:', error);
     });
+
+    try {
+      const userEmail = await AsyncStorage.getItem('user_email');
+      if (userEmail && currentUser) {
+        await sendKycNotificationEmail(
+          userEmail,
+          currentUser.name,
+          'pending'
+        );
+        console.log('[Email] KYC notification sent to:', userEmail);
+      }
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+    }
   };
 
   const verifyPhone = useCallback(() => {
