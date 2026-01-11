@@ -37,8 +37,15 @@ export const [AppContext, useApp] = createContextHook(() => {
         const adminState = await AsyncStorage.getItem('is_admin');
         if (authState === 'true') {
           setIsAuthenticated(true);
-          setCurrentUser(getCurrentUser());
+          const user = getCurrentUser();
+          setCurrentUser(user);
           setIsAdmin(adminState === 'true');
+          
+          if (user.kycData) {
+            setKycData(user.kycData);
+          } else if (user.kycStatus) {
+            setKycData(prev => ({ ...prev, status: user.kycStatus }));
+          }
         }
       } catch (error) {
         console.error('Failed to load auth state:', error);
@@ -101,7 +108,6 @@ export const [AppContext, useApp] = createContextHook(() => {
         console.log('Admin mode activated for:', email);
       }
       
-      updateKycData({ firstName, lastName, phone });
       setIsAuthenticated(true);
       
       const user = getCurrentUser();
@@ -109,6 +115,13 @@ export const [AppContext, useApp] = createContextHook(() => {
       user.lastName = lastName;
       user.name = `${firstName} ${lastName}`;
       setCurrentUser(user);
+      
+      updateKycData({ firstName, lastName, phone });
+      if (user.kycData) {
+        setKycData(user.kycData);
+      } else if (user.kycStatus) {
+        setKycData(prev => ({ ...prev, status: user.kycStatus, firstName, lastName, phone }));
+      }
     } catch (error) {
       console.error('Failed to register:', error);
     }
@@ -136,6 +149,12 @@ export const [AppContext, useApp] = createContextHook(() => {
         user.name = `${storedFirstName} ${storedLastName}`;
       }
       setCurrentUser(user);
+      
+      if (user.kycData) {
+        setKycData(user.kycData);
+      } else if (user.kycStatus) {
+        setKycData(prev => ({ ...prev, status: user.kycStatus }));
+      }
     } catch (error) {
       console.error('Failed to login:', error);
     }
