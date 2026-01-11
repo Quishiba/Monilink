@@ -28,6 +28,15 @@ function RootLayoutNav() {
       <Stack.Screen name="profile/[id]" />
       <Stack.Screen name="transaction/[id]" />
       <Stack.Screen name="chat/[id]" />
+      <Stack.Screen name="phone-verification" options={{ presentation: "modal" }} />
+      <Stack.Screen name="kyc-verification" options={{ presentation: "modal" }} />
+      <Stack.Screen name="profile-info" />
+      <Stack.Screen name="profile-security" />
+      <Stack.Screen name="profile-support" />
+      <Stack.Screen name="profile-evaluation" />
+      <Stack.Screen name="profile-terms" />
+      <Stack.Screen name="profile-privacy" />
+      <Stack.Screen name="test-sms-send" />
     </Stack>
   );
 }
