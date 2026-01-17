@@ -30,22 +30,52 @@ export const [AppContext, useApp] = createContextHook(() => {
   const [language, setLanguage] = useState<Language>('fr');
   const [t, setT] = useState<Translations>(getTranslations('fr'));
   const [pushToken, setPushToken] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [userPhone, setUserPhone] = useState<string>('');
 
   useEffect(() => {
     const loadAuthState = async () => {
       try {
         const authState = await AsyncStorage.getItem('is_authenticated');
         const adminState = await AsyncStorage.getItem('is_admin');
+        const storedEmail = await AsyncStorage.getItem('user_email');
+        const storedPhone = await AsyncStorage.getItem('user_phone');
+        const storedFirstName = await AsyncStorage.getItem('user_firstName');
+        const storedLastName = await AsyncStorage.getItem('user_lastName');
+        
+        if (storedEmail) setUserEmail(storedEmail);
+        if (storedPhone) setUserPhone(storedPhone);
+        
         if (authState === 'true') {
           setIsAuthenticated(true);
           const user = getCurrentUser();
+          
+          if (storedFirstName && storedLastName) {
+            user.firstName = storedFirstName;
+            user.lastName = storedLastName;
+            user.name = `${storedFirstName} ${storedLastName}`;
+          }
+          
           setCurrentUser(user);
           setIsAdmin(adminState === 'true');
           
           if (user.kycData) {
             setKycData(user.kycData);
           } else if (user.kycStatus) {
-            setKycData(prev => ({ ...prev, status: user.kycStatus }));
+            setKycData(prev => ({ 
+              ...prev, 
+              status: user.kycStatus,
+              firstName: storedFirstName || prev.firstName,
+              lastName: storedLastName || prev.lastName,
+              phone: storedPhone || prev.phone,
+            }));
+          } else {
+            setKycData(prev => ({
+              ...prev,
+              firstName: storedFirstName || prev.firstName,
+              lastName: storedLastName || prev.lastName,
+              phone: storedPhone || prev.phone,
+            }));
           }
         }
       } catch (error) {
@@ -103,6 +133,9 @@ export const [AppContext, useApp] = createContextHook(() => {
       await AsyncStorage.setItem('user_phone', phone);
       if (email) await AsyncStorage.setItem('user_email', email);
       
+      if (email) setUserEmail(email);
+      if (phone) setUserPhone(phone);
+      
       if (email === 'fotsingalexias@yahoo.fr') {
         await AsyncStorage.setItem('is_admin', 'true');
         setIsAdmin(true);
@@ -117,12 +150,12 @@ export const [AppContext, useApp] = createContextHook(() => {
       user.name = `${firstName} ${lastName}`;
       setCurrentUser(user);
       
-      updateKycData({ firstName, lastName, phone });
-      if (user.kycData) {
-        setKycData(user.kycData);
-      } else if (user.kycStatus) {
-        setKycData(prev => ({ ...prev, status: user.kycStatus, firstName, lastName, phone }));
-      }
+      setKycData(prev => ({ 
+        ...prev, 
+        firstName, 
+        lastName, 
+        phone,
+      }));
     } catch (error) {
       console.error('Failed to register:', error);
     }
@@ -137,6 +170,10 @@ export const [AppContext, useApp] = createContextHook(() => {
       const storedFirstName = await AsyncStorage.getItem('user_firstName');
       const storedLastName = await AsyncStorage.getItem('user_lastName');
       const storedEmail = await AsyncStorage.getItem('user_email');
+      const storedPhone = await AsyncStorage.getItem('user_phone');
+      
+      if (storedEmail) setUserEmail(storedEmail);
+      if (storedPhone) setUserPhone(storedPhone);
       
       if (storedEmail === 'fotsingalexias@yahoo.fr') {
         await AsyncStorage.setItem('is_admin', 'true');
@@ -154,7 +191,20 @@ export const [AppContext, useApp] = createContextHook(() => {
       if (user.kycData) {
         setKycData(user.kycData);
       } else if (user.kycStatus) {
-        setKycData(prev => ({ ...prev, status: user.kycStatus }));
+        setKycData(prev => ({ 
+          ...prev, 
+          status: user.kycStatus,
+          firstName: storedFirstName || prev.firstName,
+          lastName: storedLastName || prev.lastName,
+          phone: storedPhone || prev.phone,
+        }));
+      } else {
+        setKycData(prev => ({
+          ...prev,
+          firstName: storedFirstName || prev.firstName,
+          lastName: storedLastName || prev.lastName,
+          phone: storedPhone || prev.phone,
+        }));
       }
     } catch (error) {
       console.error('Failed to login:', error);
@@ -371,6 +421,8 @@ export const [AppContext, useApp] = createContextHook(() => {
     isAuthenticated,
     pushToken,
     isAdmin,
+    userEmail,
+    userPhone,
     toggleAdminMode,
     addOffer,
     createTransaction,

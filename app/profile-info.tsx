@@ -7,7 +7,7 @@ import { useApp } from '@/context/AppContext';
 
 export default function ProfileInfoScreen() {
   const router = useRouter();
-  const { kycData, currentUser, t } = useApp();
+  const { kycData, currentUser, t, userEmail, userPhone } = useApp();
 
   if (!currentUser) {
     return (
@@ -129,7 +129,7 @@ export default function ProfileInfoScreen() {
                   <View style={styles.phoneRow}>
                     <TextInput
                       style={styles.input}
-                      value={kycData.phone}
+                      value={kycData.phone || userPhone || ''}
                       placeholder="+33 6 12 34 56 78"
                       placeholderTextColor={colors.dark.textSecondary}
                       editable={false}
@@ -151,7 +151,7 @@ export default function ProfileInfoScreen() {
                   </View>
                   <TextInput
                     style={styles.input}
-                    value="user@example.com"
+                    value={userEmail || ''}
                     placeholder="email@example.com"
                     placeholderTextColor={colors.dark.textSecondary}
                     editable={false}
