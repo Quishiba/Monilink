@@ -17,7 +17,6 @@ export default function ProfileScreen() {
   const [showCurrencyModal, setShowCurrencyModal] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [preferredCurrencies, setPreferredCurrencies] = useState<Currency[]>([]);
-
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
@@ -30,54 +29,10 @@ export default function ProfileScreen() {
   useEffect(() => {
     if (!currentUser) {
       setShowAuthModal(true);
+    } else {
+      setShowAuthModal(false);
     }
   }, [currentUser]);
-
-  if (!currentUser) {
-    return (
-      <View style={styles.container}>
-        <SafeAreaView style={styles.safeArea} edges={['top']}>
-          <View style={styles.header}>
-            <Text style={styles.headerTitle}>{t.profile.title}</Text>
-          </View>
-
-          <Modal
-            visible={showAuthModal}
-            transparent
-            animationType="fade"
-            onRequestClose={() => setShowAuthModal(false)}
-          >
-            <View style={styles.authModalOverlay}>
-              <View style={styles.authModalContent}>
-                <Text style={styles.authModalTitle}>{t.auth.loginRequired}</Text>
-                <Text style={styles.authModalMessage}>{t.auth.loginToAccessProfile}</Text>
-                <TouchableOpacity
-                  style={styles.authModalButton}
-                  onPress={() => {
-                    setShowAuthModal(false);
-                    router.push('/login');
-                  }}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.authModalButtonText}>{t.auth.login}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.authModalButtonSecondary}
-                  onPress={() => {
-                    setShowAuthModal(false);
-                    router.push('/register');
-                  }}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.authModalButtonSecondaryText}>{t.auth.signup}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-        </SafeAreaView>
-      </View>
-    );
-  }
 
   const getKycStatusLabel = () => {
     switch (kycData.status) {
@@ -144,6 +99,52 @@ export default function ProfileScreen() {
     { icon: ShieldCheck, label: t.profile.privacyPolicy, onPress: () => router.push('/profile-privacy') },
     { icon: LogOut, label: t.profile.logout, onPress: () => {}, color: '#EF4444' },
   ];
+
+  if (!currentUser) {
+    return (
+      <View style={styles.container}>
+        <SafeAreaView style={styles.safeArea} edges={['top']}>
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>{t.profile.title}</Text>
+          </View>
+
+          <Modal
+            visible={showAuthModal}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setShowAuthModal(false)}
+          >
+            <View style={styles.authModalOverlay}>
+              <View style={styles.authModalContent}>
+                <Text style={styles.authModalTitle}>{t.auth.loginRequired}</Text>
+                <Text style={styles.authModalMessage}>{t.auth.loginToAccessProfile}</Text>
+                <TouchableOpacity
+                  style={styles.authModalButton}
+                  onPress={() => {
+                    setShowAuthModal(false);
+                    router.push('/login');
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.authModalButtonText}>{t.auth.login}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.authModalButtonSecondary}
+                  onPress={() => {
+                    setShowAuthModal(false);
+                    router.push('/register');
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.authModalButtonSecondaryText}>{t.auth.signup}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        </SafeAreaView>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

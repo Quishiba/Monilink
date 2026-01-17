@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MoreVertical } from 'lucide-react-native';
 import colors from '@/constants/colors';
 import { useApp } from '@/context/AppContext';
-import { useEffect, useState } from 'react';
+import { useState, useMemo } from 'react';
 
 function ConversationCard({ conversation, onPress }: { conversation: any; onPress: () => void }) {
   const { t } = useApp();
@@ -111,11 +111,20 @@ export default function MessagesScreen() {
   const router = useRouter();
   const { offers, isAuthenticated, t } = useApp();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      router.replace('/login');
-    }
-  }, [isAuthenticated, router]);
+  const conversations = useMemo(() => offers.slice(0, 6).map((offer, index) => ({
+    id: offer.id,
+    user: offer.user,
+    lastMessage: [
+      'Hey, is this offer still available?',
+      'Yes! I can do the exchange tomorrow',
+      'Perfect, what time works for you?',
+      'I sent the payment',
+      'Thanks! Transaction completed',
+      'Can you send me your payment details?'
+    ][index],
+    timestamp: new Date(Date.now() - index * 3600000),
+    unread: index % 3 === 0,
+  })), [offers]);
 
   if (!isAuthenticated) {
     return (
@@ -143,21 +152,6 @@ export default function MessagesScreen() {
       </View>
     );
   }
-
-  const conversations = offers.slice(0, 6).map((offer, index) => ({
-    id: offer.id,
-    user: offer.user,
-    lastMessage: [
-      'Hey, is this offer still available?',
-      'Yes! I can do the exchange tomorrow',
-      'Perfect, what time works for you?',
-      'I sent the payment',
-      'Thanks! Transaction completed',
-      'Can you send me your payment details?'
-    ][index],
-    timestamp: new Date(Date.now() - index * 3600000),
-    unread: index % 3 === 0,
-  }));
 
   return (
     <View style={styles.container}>
